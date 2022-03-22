@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Feiegame-battleship[offline]</title>
+    <link rel="stylesheet" href="main.css">
+
+</head>
+<style>
+
+</style>
+
+<body>
+    <div id="loaddiv" style="text-align: center;">
+        <h1 style="margin-top: 40vh;">Feiegame - battleship</h1><br>
+
+        <br><br>
+        <br><br>
+        <button class="btn" onclick="login()" id="loginbnt" style="display: none;">开始唤醒</button>
+        <p style="position: absolute;bottom: 24px;left: 16px;" id="loadbytes">正在加载资源</p>
+        <div class="progress"
+            style="height: 10px;width: 100%;display: inline-block;position: absolute;bottom: 15px;left: 0;">
+            <div class="progress-bar" role="progressbar" style="width: 0%; height: 10px" aria-valuenow="0"
+                aria-valuemin="0" aria-valuemax="100" id="progress" aria-label="Resources load progress"></div>
+        </div>
+        <div class="progress"
+            style="height: 10px;width: 100%;display: inline-block;position: absolute;bottom: 0;left: 0;">
+            <div class="progress-bar" role="progressbar" style="width: 0%; height: 10px" aria-valuenow="0"
+                aria-valuemin="0" aria-valuemax="100" id="progressSingle" aria-label="Resources load progress"></div>
+        </div>
+    </div>
+    <div id="pregame">
+        <div id="existedGamesContainer">
+            <h1>正在进行的游戏</h1>
+            <p id="loadingRoom">正在获取，请稍候。</p>
+
+            <table id="existedGames">
+            </table>
+        </div>
+        <div id="createGamesDiv">
+            <h1>创建房间</h1>
+            房间名：<input type="text" placeholder="feie9454的游戏" id="gameNameToCreate"><br><br>
+
+            <button onclick="createGame()">创建</button>
+        </div>
+    </div>
+</body>
+<script src="game.js"></script>
+<script src="/js/localforage.min.js"></script>
+
+</html>

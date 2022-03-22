@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="main.css">
+</head>
+<style>
+
+</style>
+
+<body>
+    <div style="width: 49%;display: inline-block;text-align: center;">
+        <div id="main" style="width: fit-content;display: inline-block;">
+
+        </div>
+
+    </div>
+    <div style="width: 49%;display: inline-block;text-align: center;">
+
+        <div id="opponent" style="width: fit-content;display: inline-block;">
+        </div>
+    </div>
+    <div id="gamerinfo" style="width: 200px;display: inline-block;">
+        <h4>玩家：</h4>
+        <li>
+            <div class="statelight"></div>
+        </li>
+        <li>
+            <div class="statelight"></div>
+        </li><br>
+        <button onclick="confirm()">确认布局</button>
+
+    </div>
+    <div id="item">
+        <button onclick="itemsGetBack()">归位</button>
+    </div>
+
+</body>
+<script src="battle.js"></script>
+
+</html>
