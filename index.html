@@ -14,13 +14,13 @@
 </style>
 
 <body>
-    <div id="loaddiv" style="text-align: center;">
+    <div id="loadDiv" style="text-align: center;">
         <h1 style="margin-top: 40vh;">Feiegame - battleship</h1><br>
 
         <br><br>
         <br><br>
-        <button class="btn" onclick="login()" id="loginbnt" style="display: none;">开始唤醒</button>
-        <p style="position: absolute;bottom: 24px;left: 16px;" id="loadbytes">正在加载资源</p>
+        <button class="btn" onclick="login()" iD="loginBnt" style="display: none;">开始唤醒</button>
+        <p style="position: absolute;bottom: 24px;left: 16px;" id="loadBytes">正在加载资源</p>
         <div class="progress"
             style="height: 10px;width: 100%;display: inline-block;position: absolute;bottom: 15px;left: 0;">
             <div class="progress-bar" role="progressbar" style="width: 0%; height: 10px" aria-valuenow="0"
@@ -47,8 +47,42 @@
             <button onclick="createGame()">创建</button>
         </div>
     </div>
-</body>
-<script src="game.js"></script>
-<script src="/js/localforage.min.js"></script>
+    <div id="chooseFaction" style="display: none;">
+        <h2 style="display: inline-block;">选择一方</h2>
+        <h2 onclick="document.getElementById('chooseFaction').style.display='none';document.getElementById('chooseBlueBnt').style.display='none';document.getElementById('chooseRedBnt').style.display='none'"
+            style="display: inline;position: relative;left: 10vw;bottom: 6vh;">x</h2>
+        <br><button style="display: none;" id="chooseBlueBnt" onclick="joinBlue()">蓝方</button>
+        <button style="display: none;" id="chooseRedBnt" onclick="joinRed()">红方</button>
+    </div>
+    <div id="game" style="display: none;">
+        <div style="width: 49%;display: inline-block;text-align: center;">
+            <div id="main" style="width: fit-content;display: inline-block;">
 
+            </div>
+
+        </div>
+        <div style="width: 49%;display: inline-block;text-align: center;">
+
+            <div id="opponent" style="width: fit-content;display: inline-block;">
+            </div>
+        </div>
+        <div id="gamerinfo" style="width: 200px;display: inline-block;">
+            <h4>玩家：</h4>
+            <li>
+                <div class="statelight"></div>
+            </li>
+            <li>
+                <div class="statelight"></div>
+            </li><br>
+            <button onclick="confirm()">确认布局</button>
+
+        </div>
+        <div id="item">
+            <button onclick="itemsGetBack()">归位</button>
+        </div>
+    </div>
+</body>
+<script src="./game.js"></script>
+<script src="/js/localforage.min.js"></script>
+<script src="./battle.js"></script>
 </html>

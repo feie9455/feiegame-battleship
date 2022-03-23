@@ -8,8 +8,8 @@ class ships {
         this.pos = pos
         this.alive = h * w
     }
-    destory(dpos) {
-        delete this.pos[this.pos.indexOf(dpos)]
+    destroy(destroyPosition) {
+        delete this.pos[this.pos.indexOf(destroyPosition)]
         this.alive--
         if (this.alive < 1) {
             delete this
@@ -93,7 +93,7 @@ for (let h = 0; h < height; h++) {
     let line = document.createElement("tr")
     for (let w = 0; w < width; w++) {
         let block = document.createElement("td")
-        block.className = "mapblock"
+        block.className = "mapBlock"
         block.id = "b" + (h * width + w)
         line.appendChild(block)
     }
@@ -106,7 +106,7 @@ for (let h = 0; h < height; h++) {
     let line = document.createElement("tr")
     for (let w = 0; w < width; w++) {
         let block = document.createElement("td")
-        block.className = "mapblock_"
+        block.className = "mapBlock_"
         block.id = "o" + (h * width + w)
         line.appendChild(block)
     }
@@ -135,7 +135,7 @@ function addItemListener(element) {
     element.onmousedown = function (event) {
         let mouseoverE = document.elementsFromPoint(event.clientX, event.clientY)[3]
         if (mouseoverE) {
-            if (mouseoverE.id.length > 0 & mouseoverE.className == "mapblock") {
+            if (mouseoverE.id.slice(0,1)=="b" & mouseoverE.className == "mapBlock") {
                 mouseover = mouseoverE.id.slice(1)
             } else {
                 mouseover = undefined
@@ -149,7 +149,7 @@ function addItemListener(element) {
         let element_ = element
         let objx
         let objy
-        let refrush = function (event) {
+        let refresh = function (event) {
             element_.parentElement.parentElement.parentElement.parentElement.style.top = objy
             element_.parentElement.parentElement.parentElement.parentElement.style.left = objx
         }
@@ -160,10 +160,10 @@ function addItemListener(element) {
             var event = event || window.event;
             objx = X0 + event.clientX - diffX + "px"
             objy = Y0 + event.clientY - diffY + "px"
-            refrush(event)
+            refresh(event)
             mouseoverE = document.elementsFromPoint(event.clientX, event.clientY)[3]
             if (mouseoverE) {
-                if (mouseoverE.id.length > 0 & mouseoverE.className == "mapblock") {
+                if (mouseoverE.id.slice(0,1)=="b" & mouseoverE.className == "mapBlock") {
                     mouseover = mouseoverE.id.slice(1)
                 } else {
                     mouseover = undefined
@@ -195,19 +195,19 @@ function addItemListener(element) {
                             for (let index = 0; index < eH; index++) {
                                 posToPut.push(mouseover - width * pos + index * width)
                             }
-                            let thisship
+                            let thisShip
                             switch (Number(eH)) {
                                 case 1:
-                                    thisship = new b1ship(posToPut)
+                                    thisShip = new b1ship(posToPut)
                                     break;
                                 case 2:
-                                    thisship = new b2shipH(posToPut)
+                                    thisShip = new b2shipH(posToPut)
                                     break
                                 case 3:
-                                    thisship = new b3shipH(posToPut)
+                                    thisShip = new b3shipH(posToPut)
                                     break
                                 case 4:
-                                    thisship = new b4shipH(posToPut)
+                                    thisShip = new b4shipH(posToPut)
                                     break
                                 default:
                                     break;
@@ -215,7 +215,7 @@ function addItemListener(element) {
                             for (let index = 0; index < eH; index++) {
                                 document.getElementById("b" + (mouseover - width * pos + index * width)).style.backgroundColor = "blue"
                                 document.getElementById("b" + (mouseover - width * pos + index * width)).classList.add("canRemove")
-                                mapArr[Math.floor((mouseover - width * pos + index * width) / width)][(mouseover - width * pos + index * width) % width] = thisship
+                                mapArr[Math.floor((mouseover - width * pos + index * width) / width)][(mouseover - width * pos + index * width) % width] = thisShip
                             }
                             success = true
                         }
@@ -232,19 +232,19 @@ function addItemListener(element) {
                             for (let index = 0; index < eW; index++) {
                                 posToPut.push(mouseover - pos + index)
                             }
-                            let thisship
+                            let thisShip
                             switch (Number(eW)) {
                                 case 1:
-                                    thisship = new b1ship(posToPut)
+                                    thisShip = new b1ship(posToPut)
                                     break;
                                 case 2:
-                                    thisship = new b2shipW(posToPut)
+                                    thisShip = new b2shipW(posToPut)
                                     break
                                 case 3:
-                                    thisship = new b3shipW(posToPut)
+                                    thisShip = new b3shipW(posToPut)
                                     break
                                 case 4:
-                                    thisship = new b4shipW(posToPut)
+                                    thisShip = new b4shipW(posToPut)
                                     break
                                 default:
                                     break;
@@ -252,7 +252,7 @@ function addItemListener(element) {
                             for (let index = 0; index < eW; index++) {
                                 document.getElementById("b" + (mouseover - pos + index)).style.backgroundColor = "blue"
                                 document.getElementById("b" + (mouseover - pos + index)).classList.add("canRemove")
-                                mapArr[Math.floor((mouseover - pos + index) / width)][(mouseover - pos + index) % width] = thisship
+                                mapArr[Math.floor((mouseover - pos + index) / width)][(mouseover - pos + index) % width] = thisShip
                             }
                             success = true
                         }
@@ -272,20 +272,20 @@ function addItemListener(element) {
     }
 }
 
-document.getElementById("main").querySelectorAll(".mapblock").forEach(element => addMapListener(element))
+document.getElementById("main").querySelectorAll(".mapBlock").forEach(element => addMapListener(element))
 function addMapListener(element) {
     element.addEventListener("click", () => {
-        let thisid = element.id.slice(1)
-        let clickdE = mapArr[id2pos(thisid)[0]][id2pos(thisid)[1]]
+        let thisId = element.id.slice(1)
+        let clickedE = mapArr[id2pos(thisId)[0]][id2pos(thisId)[1]]
         if (!gameStarted) {
-            if (clickdE instanceof ships) {
-                for (let index = 0; index < clickdE.pos.length; index++) {
-                    const position = clickdE.pos[index];
+            if (clickedE instanceof ships) {
+                for (let index = 0; index < clickedE.pos.length; index++) {
+                    const position = clickedE.pos[index];
                     mapArr[id2pos(position)[0]][id2pos(position)[1]] = null
                     document.getElementById("b" + position).style.backgroundColor = ""
                     document.getElementById("b" + position).classList.remove("canRemove")
                 }
-                createShip(clickdE.h, clickdE.w)
+                createShip(clickedE.h, clickedE.w)
             }
         }
     })
@@ -313,14 +313,14 @@ function getPosH(element) {
 }
 
 function createShip(h, w, posX, posY) {
-    let newship
-    newship = document.createElement("div")
-    newship.className = "ships"
+    let newShip
+    newShip = document.createElement("div")
+    newShip.className = "ships"
     let tbody = document.createElement("tbody")
-    newship.style.top = "10px"
-    newship.style.left = "10px"
-    newship.setAttribute("height", h)
-    newship.setAttribute("width", w)
+    newShip.style.top = "10px"
+    newShip.style.left = "10px"
+    newShip.setAttribute("height", h)
+    newShip.setAttribute("width", w)
 
     let table = document.createElement("table")
     if (h > w) {
@@ -328,37 +328,37 @@ function createShip(h, w, posX, posY) {
         for (let index = 0; index < h; index++) {
             let line = document.createElement("tr")
             let block = document.createElement("td")
-            block.className="shipblock"
+            block.className="shipBlock"
             addItemListener(block)
             line.appendChild(block)
             tbody.appendChild(line)
         }
         table.appendChild(tbody)
-        newship.append(table)
+        newShip.append(table)
     } else {
 
         let line = document.createElement("tr")
         for (let index = 0; index < w; index++) {
             let block = document.createElement("td")
-            block.className="shipblock"
+            block.className="shipBlock"
             addItemListener(block)
             line.appendChild(block)
         }
         let tbody = document.createElement("tbody")
         tbody.appendChild(line)
         table.appendChild(tbody)
-        newship.append(table)
+        newShip.append(table)
     }
     if (posX) {
-        newship.style.left = posX
-        newship.style.top = posY
+        newShip.style.left = posX
+        newShip.style.top = posY
     }
-    return item.appendChild(newship)
+    return item.appendChild(newShip)
 }
 function cycle(element) {
-    let thisship = element.parentElement.parentElement.parentElement.parentElement
-    createShip(thisship.getAttribute("width"), thisship.getAttribute("height"), thisship.style.left, thisship.style.top)
-    thisship.remove()
+    let thisShip = element.parentElement.parentElement.parentElement.parentElement
+    createShip(thisShip.getAttribute("width"), thisShip.getAttribute("height"), thisShip.style.left, thisShip.style.top)
+    thisShip.remove()
 }
 
 function itemsGetBack() {
@@ -393,63 +393,6 @@ function getElementTop(element) {
         current = current.offsetParent;
     }
     return actualTop;
-}
-
-let ws
-tryWS()
-function tryWS() {
-    try {
-        ws = new WebSocket("wss://127.0.0.1:9454")
-        ws.onopen = function () {
-            console.log(`WS connection OK.`);
-            document.getElementsByTagName("title")[0].innerHTML = "Feiegame-battleship[online]"
-        };
-
-        ws.onmessage = function (evt) {
-            var received_msg = evt.data;
-            console.log(`WS received ${received_msg}`);
-            if (received_msg.slice(0, 5) == "games") {
-                document.querySelector("#existedGames").remove()
-                let existedGames = document.createElement("div")
-                existedGames.id = "existedGames"
-                let gamesarr = received_msg.split("//")
-                gamesarr.shift()
-                for (let index = 0; index < gamesarr.length; index++) {
-                    const element = gamesarr[index];
-                    let obj = document.createElement("li")
-                    let obj2 = document.createElement("a")
-                    obj2.innerHTML = htmlspecialchars(element)
-
-                    obj2.class = "existgameli"
-                    obj2.href = `javascript:enterGame(${index})`
-                    obj.appendChild(obj2)
-                    existedGames.appendChild(obj)
-                }
-                document.querySelector("#existedGamesContainer").appendChild(existedGames)
-            } else if (received_msg == "samegame") {
-                alert("房间名重复")
-            }
-
-        };
-
-        ws.onclose = function () {
-            document.getElementsByTagName("title")[0].innerHTML = "Feiegame-battleship[offline]"
-
-        };
-
-        ws.onerror = () => {
-            document.getElementsByTagName("title")[0].innerHTML = "Feiegame-battleship[offline]"
-
-            setTimeout(() => {
-                console.log("WS connection error. Retry.");
-                tryWS()
-            }, 2000);
-        }
-    } catch (error) {
-        setTimeout(() => {
-            tryWS()
-        }, 2000);
-    }
 }
 
 function confirm() {

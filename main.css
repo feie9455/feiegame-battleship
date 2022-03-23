@@ -22,7 +22,7 @@ body {
 
 }
 
-.shipblock {
+.shipBlock {
     line-height: 15px;
     height: 15px;
     width: 15px;
@@ -31,7 +31,7 @@ body {
 
 }
 
-.mapblock {
+.mapBlock {
     line-height: 30px;
     height: 30px;
     width: 30px;
@@ -43,7 +43,7 @@ body {
     cursor: all-scroll;
 }
 
-.mapblock_ {
+.mapBlock_ {
     line-height: 30px;
     height: 30px;
     width: 30px;
@@ -88,7 +88,7 @@ button:hover {
     cursor: pointer;
 }
 
-#loaddiv {
+#loadDiv {
     transition: opacity 0.5s;
     opacity: 1;
 }
@@ -136,6 +136,24 @@ input {
     border: 0px;
 }
 
-.borderbottom {
+.borderBottom {
     border: 1px
+}
+
+#chooseFaction{
+    width: 50vw;
+    height: 50vh;
+    position: fixed;
+    left: 25vw;
+    top: 25vh;
+    background-color: whitesmoke;
+    border-radius: 4px;
+    border: 2px solid black;
+    box-shadow: 0px 2px 10px 2px;
+    line-height: 20vh;
+}
+
+div{
+    transition: opacity 0.1s;
+    
 }

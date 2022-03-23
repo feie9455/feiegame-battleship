@@ -5,7 +5,7 @@ const resToGet = ["/res/m_sys_void_intro.ogg", "/res/m_sys_void_loop.ogg", "/res
 const audioRes = []
 const musicPlaying = []
 let ws
-let roomid
+let roomId
 
 
 
@@ -22,88 +22,72 @@ function tryWS() {
         ws.onmessage = function (evt) {
             if (document.getElementById("loadingRoom")) { document.getElementById("loadingRoom").remove() }
             var received_msg = JSON.parse(evt.data);
-            console.log(`WS received ${received_msg}`);
+            console.log(evt.data);
             switch (received_msg[0]) {
                 case "gamelist":
                     document.querySelector("#existedGames").remove()
                     let existedGames = document.createElement("table")
                     existedGames.id = "existedGames"
-                    let gamesarr = received_msg.split("//")
-                    gamesarr.shift()
                     let obj = document.createElement("tr")
-                    let obj3 = document.createElement("td")
-                    let obj4 = document.createElement("td")
-                    let obj5 = document.createElement("td")
-                    let obj6 = document.createElement("td")
-                    obj3.innerHTML = "状态"
-                    obj4.innerHTML = "唯一识别码"
-                    obj5.innerHTML = "房间名"
-                    obj6.innerHTML = "进入"
-                    obj3.className = "borderbottom"
-                    obj4.className = "borderbottom"
-                    obj5.className = "borderbottom"
-                    obj6.className = "borderbottom"
-                    obj.appendChild(obj5)
-                    obj.appendChild(obj3)
-                    obj.appendChild(obj4)
-                    obj.appendChild(obj6)
+                    obj.innerHTML = '<td class="borderBottom">房间名</td><td class="borderBottom">状态</td><td class="borderBottom">唯一识别码</td><td class="borderBottom">进入</td>'
                     existedGames.appendChild(obj)
-                    let gamearr=received_msg[1]
-                    for (let index = 0; index < gamearr.length; index++) {
-                        const element = gamearr[index];
-                        let line=document.createElement("tr")
-                        for (let index_ = 0; index_ < element.length; index_++) {
-                            const element_ = element[index_];
-                            let name = document.createElement("td")
-                            let state = document.createElement("td")
-                            let uuid = document.createElement("td")
-                            let bnt = document.createElement("a")
-                            
-                        }
-                    }
-                    break;
+                    let gameArr = received_msg[1]
+                    for (let index = 0; index < gameArr.length; index++) {
+                        const element = gameArr[index];
+                        let line = document.createElement("tr")
 
+                        let name = document.createElement("td")
+                        let state = document.createElement("td")
+                        let uuid = document.createElement("td")
+                        let bnt = document.createElement("a")
+                        name.innerHTML = element[0]
+                        uuid.innerHTML = element[1]
+                        for (let index2 = 2; index2 < element.length; index2++) {
+                            const st = element[index2];
+                            switch (st) {
+                                case 0:
+                                    state.innerHTML += "-"
+                                    break;
+                                case 1:
+                                    state.innerHTML += "O"
+                                    break
+                                case 2:
+                                    state.innerHTML += "√"
+                                    break
+                                default:
+                                    break;
+                            }
+
+                        }
+                        bnt.href = `javascript:selectGame('${element[1]}')`
+                        bnt.innerHTML = "→"
+                        line.append(name); line.append(state); line.append(uuid); line.append(bnt)
+                        existedGames.append(line)
+
+                    }
+                    document.getElementById("existedGamesContainer").append(existedGames)
+                    if (!document.getElementById("stateinfo")) {
+                        let info = document.createElement("p")
+                        info.id = "stateInfo"
+                        info.innerHTML = "状态说明：三个字符依次为蓝方状态、红方状态和房间状态。“-”表示未开始，“O”表示已开始但缺席，“√”代表正常进行中"
+                        document.getElementById("existedGamesContainer").append(info)
+                    }
+
+                    break;
+                case "enterroom":
+                    roomId = received_msg[1]
+                    document.getElementById('chooseFaction').style.display = "block"
+                    if (received_msg[2] != 2) { document.getElementById('chooseBlueBnt').style.display = "inline-block" }
+                    if (received_msg[3] != 2) { document.getElementById('chooseRedBnt').style.display = "inline-block" }
+                    break;
+                case "entergame":
+                    document.getElementById("pregame").style.display = "none"
+                    document.getElementById("chooseFaction").style.display = "none"
+                    break
                 default:
                     break;
             }
-            if (received_msg.slice(0, 5) == "games") {
-                for (let index = 0; index < gamesarr.length - 1; index++) {
-                    const element = gamesarr[index];
-                    let origindata = htmlspecialchars(element)
-                    let dataarr = origindata.split(":")
-                    if (dataarr[2] == "running") {
-                        let obj = document.createElement("tr")
-                        let obj3 = document.createElement("td")
-                        let obj4 = document.createElement("td")
-                        let obj5 = document.createElement("td")
-                        let obj6 = document.createElement("a")
-                        obj3.className = "noborder"
-                        obj4.className = "noborder"
-                        obj5.className = "noborder"
-                        obj3.style.width = "10%"
-                        obj4.style.width = "50%"
-                        obj5.style.width = "30%"
-                        obj5.innerHTML = dataarr[1]
-                        obj4.innerHTML = dataarr[0]
-                        obj3.innerHTML = "⚪"
-                        obj6.innerHTML = "→"
-                        obj6.className = "noborder"
-                        obj6.href = `javascript:enterGame(${index},${dataarr[0]})`
-                        obj6.style.width = "10%"
-                        obj.appendChild(obj5)
-                        obj.appendChild(obj3)
-                        obj.appendChild(obj4)
-                        obj.appendChild(obj6)
-                        existedGames.appendChild(obj)
-
-                    }
-                }
-                document.querySelector("#existedGamesContainer").appendChild(existedGames)
-            } else if (received_msg == "samename") {
-                alert("房间名重复")
-            }
-
-        };
+        }
 
         ws.onclose = function () {
             document.getElementsByTagName("title")[0].innerHTML = "Feiegame-battleship[offline]"
@@ -145,20 +129,20 @@ class musicObj {
 }
 
 window.onload = () => {
-    startload()
+    startLoad()
     document.querySelectorAll("button").forEach(element => {
-        element.addEventListener("click", () => playaudio("/res/g_ui_confirm.ogg"))
+        element.addEventListener("click", () => playAudio("/res/g_ui_confirm.ogg"))
     });
 }
 
-async function startload() {
+async function startLoad() {
     for (let index = 0; index < resToGet.length; index++) {
         const element = resToGet[index];
         await preload(element, index)
         setProgressBar(index + 1, resToGet.length, "progress")
     }
-    document.querySelector("#loadbytes").innerHTML = `加载完成`
-    document.querySelector("#loginbnt").style.display = "inline-block"
+    document.querySelector("#loadBytes").innerHTML = `加载完成`
+    document.querySelector("#loginBnt").style.display = "inline-block"
     audioRes[resToGet.indexOf("/res/m_sys_title_intro.ogg")].play("switch", "/res/m_sys_title_loop.ogg")
 }
 
@@ -167,8 +151,8 @@ function preload(url, index) {
         localforage.getItem(url)
             .then(file => {
                 let fileOK = function () {
-                    let mobj = new musicObj(URL.createObjectURL(file))
-                    audioRes.push(mobj)
+                    let musicObj_ = new musicObj(URL.createObjectURL(file))
+                    audioRes.push(musicObj_)
                     setProgressBar(100, 100, "progressSingle")
                     localforage.setItem(url, file).then(() => resolve())
                 }
@@ -177,7 +161,7 @@ function preload(url, index) {
                     xhr.responseType = "blob"
                     xhr.onprogress = oEvent => {
                         setProgressBar(oEvent.loaded, oEvent.total, "progressSingle")
-                        document.querySelector("#loadbytes").innerHTML = `正在加载资源 共${index}/${resToGet.length}个 当前资源${Math.ceil(oEvent.loaded / 1024)}KB / ${Math.ceil(oEvent.total / 1024)}KB`
+                        document.querySelector("#loadBytes").innerHTML = `正在加载资源 共${index}/${resToGet.length}个 当前资源${Math.ceil(oEvent.loaded / 1024)}KB / ${Math.ceil(oEvent.total / 1024)}KB`
                     }
                     xhr.onreadystatechange = function () {
                         if (xhr.readyState == 4 && xhr.status == 200) {
@@ -193,47 +177,55 @@ function preload(url, index) {
     })
 }
 
-function playaudio(audio) {
+function playAudio(audio) {
     audioRes[resToGet.indexOf(audio)].play()
 }
 
-function setProgressBar(now, total, objid) {
-    let progress = document.getElementById(objid)
+function setProgressBar(now, total, objId) {
+    let progress = document.getElementById(objId)
     progress.ariaValueMax = Math.floor(total)
     progress.ariaValueNow = Math.floor(now)
     progress.style.width = String(Math.floor(now) / Math.floor(total) * 100 + "%")
 }
 
 function login() {
-    document.getElementById("loginbnt").disabled = "disabled"
+    document.getElementById("loginBnt").disabled = "disabled"
     musicPlaying.forEach(obj => obj.pause())
-    document.querySelector("#loaddiv").style.display = "block"
-    document.querySelector("#loaddiv").style.opacity = 0
+    document.querySelector("#loadDiv").style.display = "block"
+    document.querySelector("#loadDiv").style.opacity = 0
     setTimeout(() => {
-        document.querySelector("#loaddiv").style.display = "none"
-        document.querySelector("#pregame").style.opacity = 1
+        document.querySelector("#loadDiv").style.display = "none"
         document.querySelector("#pregame").style.display = "block"
+        setTimeout(() => {
+            document.querySelector("#pregame").style.opacity = 1
+        }, 10);
         audioRes[resToGet.indexOf("/res/m_sys_void_intro.ogg")].play("switch", "/res/m_sys_void_loop.ogg")
         ws.send(JSON.stringify(["getgames"]))
     }, 501);
-    let refrushInterval = setInterval(() => {
-        ws.send(JSON.stringify(["getgames"]))
+    let refreshInterval = setInterval(() => {
+        //ws.send(JSON.stringify(["getgames"]))
 
     }, 4000);
 }
 
-function enterGame(num, id) {
-    console.log(num);
-    roomid = id
-    ws.send(JSON.stringify(["genter"], num))
+function selectGame(id) {
+    console.log(id);
+    ws.send(JSON.stringify(["gselect", id]))
 
 }
 
 function createGame() {
     let name = document.getElementById("gameNameToCreate").value
     if (name.length >= 4) {
-        ws.send(JSON.stringify(["creategame"], name))
+        ws.send(JSON.stringify(["creategame", name]))
     } else { alert("需要至少4位数的房间名") }
+}
+
+function joinBlue() {
+    ws.send(JSON.stringify(["genter", roomId, 0]))
+}
+function joinRed() {
+    ws.send(JSON.stringify(["genter", roomId, 1]))
 }
 
 function htmlspecialchars(str) {
