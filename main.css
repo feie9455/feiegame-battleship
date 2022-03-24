@@ -8,9 +8,7 @@ body {
 
 
 #item {
-    position: absolute;
-    bottom: 100px;
-    background-color: lightblue;
+    background-color: rgba(173, 216, 230, 0.9);
     border-radius: 2px;
     border-style: dashed;
     width: 90vw;
@@ -140,7 +138,7 @@ input {
     border: 1px
 }
 
-#chooseFaction{
+#chooseFaction {
     width: 50vw;
     height: 50vh;
     position: fixed;
@@ -153,7 +151,48 @@ input {
     line-height: 20vh;
 }
 
-div{
-    transition: opacity 0.1s;
-    
+div {
+    transition: opacity 0.5s;
+
+}
+
+#gameinfo {
+    background-color: rgba(173, 216, 230, 0.9);
+    border-radius: 2px;
+    border-style: dashed;
+    width: 20vw;
+    height: 300px;
+    display: inline-block;
+    position: fixed;
+    bottom: 400px;
+    left: 40vw;
+    line-height: 50px;
+
+}
+
+#gameinfo p {
+    display: inline;
+}
+
+#noticeContainer {
+    position: fixed;
+    top: 0px;
+    right: 0px;
+    width: 350px;
+    text-align: center;
+}
+
+.notice {
+    padding: 16px;
+    margin-top: 16px;
+    text-align: left;
+    display: inline-block;
+    box-shadow: 0 4px 10px 0 rgb(0 0 0 / 20%), 0 4px 20px 0 rgb(0 0 0 / 10%);
+    background-color: rgb(18, 102, 241,0.8);
+    border-radius: 4px;
+    width: 300px;
+    height: 60px;
+    color: white;
+    transition: opacity 0.2s;
+    font-size: large;
 }

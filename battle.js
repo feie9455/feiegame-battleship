@@ -1,6 +1,7 @@
 "use strict"
 let gameStarted = false
 let mouseover
+let turn = 0
 class ships {
     constructor(h, w, pos) {
         this.h = h
@@ -116,7 +117,7 @@ document.getElementById("opponent").append(table)
 
 function addItemListener(element) {
     element.addEventListener("mouseover", () => {
-        element.parentElement.querySelectorAll("td").forEach(e => e.style.borderColor = "blue")
+        element.parentElement.querySelectorAll("td").forEach(e => e.style.borderColor = factionNow)
     })
     element.addEventListener("mouseleave", () => {
         element.parentElement.querySelectorAll("td").forEach(e => {
@@ -188,7 +189,7 @@ function addItemListener(element) {
                     let mouseoverLine = id2pos(mouseover)[0]
                     if (mouseoverLine >= pos & mouseoverLine + (eH - pos - 1) <= height - 1) {
                         for (let index = 0; index < eH; index++) {
-                            if (document.getElementById("b" + (mouseover - width * pos + index * width)).style.backgroundColor == "blue") { isConflict = true }
+                            if (document.getElementById("b" + (mouseover - width * pos + index * width)).style.backgroundColor == factionNow) { isConflict = true }
                         }
                         if (!isConflict) {
                             let posToPut = []
@@ -213,7 +214,7 @@ function addItemListener(element) {
                                     break;
                             }
                             for (let index = 0; index < eH; index++) {
-                                document.getElementById("b" + (mouseover - width * pos + index * width)).style.backgroundColor = "blue"
+                                document.getElementById("b" + (mouseover - width * pos + index * width)).style.backgroundColor = factionNow
                                 document.getElementById("b" + (mouseover - width * pos + index * width)).classList.add("canRemove")
                                 mapArr[Math.floor((mouseover - width * pos + index * width) / width)][(mouseover - width * pos + index * width) % width] = thisShip
                             }
@@ -225,7 +226,7 @@ function addItemListener(element) {
 
                     if (pos <= mouseover % width & (mouseover % width) - pos <= (width - eW)) {
                         for (let index = 0; index < eW; index++) {
-                            if (document.getElementById("b" + (mouseover - pos + index)).style.backgroundColor == "blue") { isConflict = true }
+                            if (document.getElementById("b" + (mouseover - pos + index)).style.backgroundColor == factionNow) { isConflict = true }
                         }
                         if (!isConflict) {
                             let posToPut = []
@@ -250,7 +251,7 @@ function addItemListener(element) {
                                     break;
                             }
                             for (let index = 0; index < eW; index++) {
-                                document.getElementById("b" + (mouseover - pos + index)).style.backgroundColor = "blue"
+                                document.getElementById("b" + (mouseover - pos + index)).style.backgroundColor = factionNow
                                 document.getElementById("b" + (mouseover - pos + index)).classList.add("canRemove")
                                 mapArr[Math.floor((mouseover - pos + index) / width)][(mouseover - pos + index) % width] = thisShip
                             }
@@ -397,5 +398,5 @@ function getElementTop(element) {
 
 function confirm() {
     let data=JSON.stringify(mapArr)
-    ws.send(`gstart:${data}`)
+    ws.send(JSON.stringify["gstart",data,factionNow])
 }

@@ -6,14 +6,17 @@ const audioRes = []
 const musicPlaying = []
 let ws
 let roomId
-
+let factionNow
 
 
 
 tryWS()
 function tryWS() {
     try {
-        ws = new WebSocket("wss://127.0.0.1:9454")
+        if (!WebSocket) {
+            alert("您的浏览器不支持Websocket，请升级您的浏览器。")
+        }
+        ws = new WebSocket("wss://192.168.1.18:9454")
         ws.onopen = function () {
             console.log(`WS connection OK.`);
             document.getElementsByTagName("title")[0].innerHTML = "Feiegame-battleship[online]"
@@ -35,7 +38,6 @@ function tryWS() {
                     for (let index = 0; index < gameArr.length; index++) {
                         const element = gameArr[index];
                         let line = document.createElement("tr")
-
                         let name = document.createElement("td")
                         let state = document.createElement("td")
                         let uuid = document.createElement("td")
@@ -81,9 +83,63 @@ function tryWS() {
                     if (received_msg[3] != 2) { document.getElementById('chooseRedBnt').style.display = "inline-block" }
                     break;
                 case "entergame":
-                    document.getElementById("pregame").style.display = "none"
-                    document.getElementById("chooseFaction").style.display = "none"
+                    document.getElementById("pregame").style.opacity = 0
+                    document.getElementById("chooseFaction").style.opacity = 0
+                    if (received_msg[1] != 0) {
+                        gameStarted = true
+                    }
+                    setTimeout(() => {
+                        musicPlaying.forEach(obj => obj.pause())
+                        const num2State = num => {
+                            switch (num) {
+                                case 0:
+                                    return "未初始化"
+                                    break;
+                                case 1:
+                                    return "离开"
+                                    break;
+                                case 2:
+                                    return "在线"
+                                    break
+                                default:
+                                    break;
+                            }
+                        }
+                        document.getElementById("blueStateDiv").innerHTML = num2State(received_msg[1])
+                        document.getElementById("redStateDiv").innerHTML = num2State(received_msg[2])
+                        if (received_msg[3][0] == 0) {
+                            document.getElementById("turnInfoDiv").innerHTML = `第${received_msg[3][0]}回合，请放置`
+                        } else {
+                            document.getElementById("turnInfoDiv").innerHTML = `第${received_msg[3][0]}回合，轮到${received_msg[3][1]}`
+
+                        }
+                        document.getElementById("playerInfo").innerHTML = `您是${factionNow}方`
+                        document.getElementById("pregame").style.display = "none"
+                        document.getElementById("chooseFaction").style.display = "none"
+                        document.getElementById("game").style.display = "block"
+                        setTimeout(() => {
+                            document.getElementById("game").style.opacity = 1
+                            audioRes[resToGet.indexOf("/res/m_bat_normal01_intro.ogg")].play("switch", "/res/m_bat_normal01_loop.ogg")
+
+                        }, 10);
+                    }, 510);
+
                     break
+                case "gameframe":
+                    switch (received_msg[1]) {
+                        case "playerjoin":
+                            if (received_msg[2] == 0) {
+                                document.getElementById("blueStateDiv").innerHTML = "在线"
+                            } else {
+                                document.getElementById("redStateDiv").innerHTML = "在线"
+                            }
+                            break;
+                        case "playerconfirm":
+
+                            break
+                        default:
+                            break;
+                    }
                 default:
                     break;
             }
@@ -104,6 +160,7 @@ function tryWS() {
         }
     } catch (error) {
         setTimeout(() => {
+
             tryWS()
         }, 2000);
     }
@@ -129,19 +186,21 @@ class musicObj {
 }
 
 window.onload = () => {
-    startLoad()
-    document.querySelectorAll("button").forEach(element => {
-        element.addEventListener("click", () => playAudio("/res/g_ui_confirm.ogg"))
-    });
 }
 
 async function startLoad() {
+    document.getElementById("loadBnt").style.display = "none"
+
     for (let index = 0; index < resToGet.length; index++) {
         const element = resToGet[index];
         await preload(element, index)
         setProgressBar(index + 1, resToGet.length, "progress")
     }
     document.querySelector("#loadBytes").innerHTML = `加载完成`
+    document.querySelectorAll("button").forEach(element => {
+        element.addEventListener("click", () => playAudio("/res/g_ui_confirm.ogg"))
+    });
+
     document.querySelector("#loginBnt").style.display = "inline-block"
     audioRes[resToGet.indexOf("/res/m_sys_title_intro.ogg")].play("switch", "/res/m_sys_title_loop.ogg")
 }
@@ -161,7 +220,7 @@ function preload(url, index) {
                     xhr.responseType = "blob"
                     xhr.onprogress = oEvent => {
                         setProgressBar(oEvent.loaded, oEvent.total, "progressSingle")
-                        document.querySelector("#loadBytes").innerHTML = `正在加载资源 共${index}/${resToGet.length}个 当前资源${Math.ceil(oEvent.loaded / 1024)}KB / ${Math.ceil(oEvent.total / 1024)}KB`
+                        document.querySelector("#loadBytes").innerHTML = `正在加载资源 共${index}/${resToGet.length}个 当前资源${url} ${Math.ceil(oEvent.loaded / 1024)}KB / ${Math.ceil(oEvent.total / 1024)}KB`
                     }
                     xhr.onreadystatechange = function () {
                         if (xhr.readyState == 4 && xhr.status == 200) {
@@ -216,16 +275,18 @@ function selectGame(id) {
 
 function createGame() {
     let name = document.getElementById("gameNameToCreate").value
-    if (name.length >= 4) {
+    if (name.length >= 3) {
         ws.send(JSON.stringify(["creategame", name]))
-    } else { alert("需要至少4位数的房间名") }
+    } else { alert("需要至少3位数的房间名") }
 }
 
 function joinBlue() {
     ws.send(JSON.stringify(["genter", roomId, 0]))
+    factionNow = "blue"
 }
 function joinRed() {
     ws.send(JSON.stringify(["genter", roomId, 1]))
+    factionNow = "red"
 }
 
 function htmlspecialchars(str) {
@@ -235,4 +296,24 @@ function htmlspecialchars(str) {
     str = str.replace(/&quot;/g, "''");
     str = str.replace(/&#039;/g, "'");
     return str;
+}
+
+function notice(content) {
+    let nNotice = document.createElement("div")
+    nNotice.className = "notice"
+    nNotice.innerHTML = content
+    nNotice.style.opacity = 0
+    document.getElementById("noticeContainer").appendChild(nNotice)
+    setTimeout(() => {
+        nNotice.style.opacity = 1
+
+    }, 10);
+    setTimeout(() => {
+        nNotice.style.opacity = 0
+        setTimeout(() => {
+            nNotice.style.display = "none"
+            nNotice.remove()
+        }, 350);
+    }, 2500);
+
 }
