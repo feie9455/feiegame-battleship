@@ -82,6 +82,11 @@ button {
     box-shadow: 0px 4px 8px black;
 }
 
+button:active {
+    background-color: #252525;
+
+}
+
 button:hover {
     cursor: pointer;
 }
@@ -97,9 +102,6 @@ button:hover {
     display: none;
 }
 
-body {
-    overflow: hidden;
-}
 
 #createGamesDiv {
     position: absolute;
@@ -141,12 +143,8 @@ input {
 #chooseFaction {
     width: 50vw;
     height: 50vh;
-    position: fixed;
     left: 25vw;
     top: 25vh;
-    background-color: whitesmoke;
-    border-radius: 4px;
-    border: 2px solid black;
     box-shadow: 0px 2px 10px 2px;
     line-height: 20vh;
 }
@@ -188,11 +186,54 @@ div {
     text-align: left;
     display: inline-block;
     box-shadow: 0 4px 10px 0 rgb(0 0 0 / 20%), 0 4px 20px 0 rgb(0 0 0 / 10%);
-    background-color: rgb(18, 102, 241,0.8);
+    background-color: rgb(18, 102, 241, 0.8);
     border-radius: 4px;
     width: 300px;
     height: 60px;
     color: white;
-    transition: opacity 0.2s;
+    transition: opacity 0.3s;
     font-size: large;
 }
+
+#WSLoadDiv {
+    width: 40vw;
+    left: 30vw;
+    top: 30vh;
+}
+
+#gameEndDiv{
+    width: 40vw;
+    left: 30vw;
+    top: 30vh;
+
+}
+
+.card {
+    height: min-content;
+    position: fixed;
+    background-color: whitesmoke;
+    border-radius: 4px;
+    border: 2px solid black;
+    box-shadow: 0px 2px 10px 2px;
+    line-height: 10vh;
+
+}
+
+
+#WSLoadDiv:hover {
+    cursor: wait;
+}
+
+
+.loader {
+    width: 30px;
+    height: 30px;
+    border-radius: 15px;
+    background-color: rgb(18, 102, 241, 0.8);
+    transition: all 0.2s;
+    opacity: 0;
+    display: inline-block;
+    margin-left: 10px;
+    margin-right: 10px;
+}
+

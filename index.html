@@ -51,17 +51,30 @@
             <button onclick="createGame()">创建</button>
         </div>
     </div>
-    <div id="chooseFaction" style="display: none;">
+    <div id="chooseFaction" style="display: none;" class="card">
         <h2 style="display: inline-block;">选择一方</h2>
         <h2 onclick="document.getElementById('chooseFaction').style.display='none';document.getElementById('chooseBlueBnt').style.display='none';document.getElementById('chooseRedBnt').style.display='none'"
             style="display: inline;position: relative;left: 10vw;bottom: 6vh;">x</h2>
         <br><button style="display: none;" id="chooseBlueBnt" onclick="joinBlue()">蓝方</button>
         <button style="display: none;" id="chooseRedBnt" onclick="joinRed()">红方</button>
     </div>
+    <div id="WSLoadDiv" style="display: none;z-index: 100;" class="card">
+        <h2>尝试与神经网络建立WebSocket链接</h2>   
+        <div class="loader"></div>
+        <div class="loader"></div>
+        <div class="loader"></div>
+    </div>
+    <div id="gameEndDiv" style="display: none;z-index: 80;" class="card">
+        <h2>游戏结束，胜利者：</h2>
+        <h1 id="winnerNameDiv"></h1>   
+        <button onclick="window.location.reload()">再来一局</button>
+
+    </div>
+
+
     <div id="game" style="display: none;opacity: 0;">
         <div style="width: 49%;display: inline-block;text-align: center;">
             <div id="main" style="width: fit-content;display: inline-block;">
-
             </div>
 
         </div>
@@ -80,7 +93,7 @@
             <p id="redStateDiv"></p>
             </p>
             <br>
-            <button onclick="confirm()">确认操作</button>
+            <button onclick="confirmPlace()" id="coonfirmPlaceBnt">确认布局</button>
 
         </div>
         <div id="item">
@@ -88,11 +101,11 @@
         </div>
     </div>
     <div id="noticeContainer">
-        
+
     </div>
 </body>
 <script src="./game.js"></script>
 <script src="/js/localforage.min.js"></script>
 <script src="./battle.js"></script>
-
+<script src="./ui.js"></script>
 </html>

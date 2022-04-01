@@ -1,13 +1,19 @@
 "use strict"
+
+
 let gameStarted = false
 let mouseover
 let turn = 0
+let shipNum = 0
 class ships {
     constructor(h, w, pos) {
+        this.type="aliveShip"
         this.h = h
         this.w = w
         this.pos = pos
         this.alive = h * w
+        this.id = shipNum
+        shipNum++
     }
     destroy(destroyPosition) {
         delete this.pos[this.pos.indexOf(destroyPosition)]
@@ -136,7 +142,7 @@ function addItemListener(element) {
     element.onmousedown = function (event) {
         let mouseoverE = document.elementsFromPoint(event.clientX, event.clientY)[3]
         if (mouseoverE) {
-            if (mouseoverE.id.slice(0,1)=="b" & mouseoverE.className == "mapBlock") {
+            if (mouseoverE.id.slice(0, 1) == "b" & mouseoverE.className == "mapBlock") {
                 mouseover = mouseoverE.id.slice(1)
             } else {
                 mouseover = undefined
@@ -164,7 +170,7 @@ function addItemListener(element) {
             refresh(event)
             mouseoverE = document.elementsFromPoint(event.clientX, event.clientY)[3]
             if (mouseoverE) {
-                if (mouseoverE.id.slice(0,1)=="b" & mouseoverE.className == "mapBlock") {
+                if (mouseoverE.id.slice(0, 1) == "b" & mouseoverE.className == "mapBlock") {
                     mouseover = mouseoverE.id.slice(1)
                 } else {
                     mouseover = undefined
@@ -218,6 +224,7 @@ function addItemListener(element) {
                                 document.getElementById("b" + (mouseover - width * pos + index * width)).classList.add("canRemove")
                                 mapArr[Math.floor((mouseover - width * pos + index * width) / width)][(mouseover - width * pos + index * width) % width] = thisShip
                             }
+                            this.onmousedown = null
                             success = true
                         }
                     }
@@ -329,7 +336,7 @@ function createShip(h, w, posX, posY) {
         for (let index = 0; index < h; index++) {
             let line = document.createElement("tr")
             let block = document.createElement("td")
-            block.className="shipBlock"
+            block.className = "shipBlock"
             addItemListener(block)
             line.appendChild(block)
             tbody.appendChild(line)
@@ -341,7 +348,7 @@ function createShip(h, w, posX, posY) {
         let line = document.createElement("tr")
         for (let index = 0; index < w; index++) {
             let block = document.createElement("td")
-            block.className="shipBlock"
+            block.className = "shipBlock"
             addItemListener(block)
             line.appendChild(block)
         }
@@ -357,9 +364,14 @@ function createShip(h, w, posX, posY) {
     return item.appendChild(newShip)
 }
 function cycle(element) {
-    let thisShip = element.parentElement.parentElement.parentElement.parentElement
-    createShip(thisShip.getAttribute("width"), thisShip.getAttribute("height"), thisShip.style.left, thisShip.style.top)
-    thisShip.remove()
+    setTimeout(() => {
+        if (element) {
+            let thisShip = element.parentElement.parentElement.parentElement.parentElement
+            createShip(thisShip.getAttribute("width"), thisShip.getAttribute("height"), thisShip.style.left, thisShip.style.top)
+            thisShip.remove()
+
+        }
+    }, 100);
 }
 
 function itemsGetBack() {
@@ -396,7 +408,60 @@ function getElementTop(element) {
     return actualTop;
 }
 
-function confirm() {
-    let data=JSON.stringify(mapArr)
-    ws.send(JSON.stringify["gstart",data,factionNow])
+function confirmPlace() {
+
+    let data = JSON.stringify(mapArr)
+    if (gameStarted) {
+
+    } else {
+        if (document.getElementsByClassName("shipBlock")[0]) {
+            if (!confirm("船还没放完，舍弃剩下的船吗？")) {
+                return
+            }
+        }
+        ws.send(JSON.stringify(["gameframe", { type: "confirm", id: roomId, faction: factionNow, data: data }]))
+        document.querySelectorAll(".shipBlock").forEach(e => e.remove())
+        gameStarted = true
+        document.getElementById("coonfirmPlaceBnt").style.display = "none"
+    }
+}
+
+function canAttack() {
+    document.querySelectorAll(".mapBlock_").forEach(
+        element => {
+            if (!element.innerHTML) {
+                element.onmousemove = () => {
+                    element.style.borderColor = "orange"
+                }
+                element.onmouseleave = () => {
+                    element.style.borderColor = "black"
+
+                }
+                element.onmousedown = () => {
+                    attack(element.id.slice(1))
+                    element.style.borderColor = "black"
+
+                }
+
+            }
+        }
+    )
+}
+
+function stopAttack() {
+    document.querySelectorAll(".mapBlock_").forEach(
+        element => {
+            element.onmousemove = undefined
+            element.onmouseleave = undefined
+            element.onmousedown = undefined
+        }
+
+    )
+
+}
+
+function attack(id) {
+    stopAttack()
+    console.log(`a:${id}`);
+    ws.send(JSON.stringify(["gameframe", { type: "attack", id: roomId, faction: factionNow, data: { pos: id, type: "normal" } }]))
 }
