@@ -80,6 +80,7 @@ button {
     background-color: #313131;
     color: whitesmoke;
     box-shadow: 0px 4px 8px black;
+    transition: all 0.2s;
 }
 
 button:active {
@@ -108,15 +109,6 @@ button:hover {
     bottom: 48px;
 }
 
-li {
-    height: 50px;
-    line-height: 50px;
-    border-style: none none solid none;
-    border-color: rgba(31, 31, 31, 0.5);
-    list-style: none;
-    padding-left: 16px;
-
-}
 
 input {
     background-color: #3A3A3A;
@@ -195,18 +187,6 @@ div {
     font-size: large;
 }
 
-#WSLoadDiv {
-    width: 40vw;
-    left: 30vw;
-    top: 30vh;
-}
-
-#gameEndDiv{
-    width: 40vw;
-    left: 30vw;
-    top: 30vh;
-
-}
 
 .card {
     height: min-content;
@@ -216,6 +196,9 @@ div {
     border: 2px solid black;
     box-shadow: 0px 2px 10px 2px;
     line-height: 10vh;
+    width: 40vw;
+    left: 30vw;
+    top: 22vh;
 
 }
 
@@ -237,3 +220,73 @@ div {
     margin-right: 10px;
 }
 
+.tagClass {
+    display: inline-block;
+    border: 1px dashed gray;
+    line-height: 40px;
+    width: 128px;
+    height: 128px;
+}
+
+
+#gameSettingDiv {
+    vertical-align: top;
+    height: 80vh;
+    top: 10vh;
+    width: 80vw;
+    left: 10vw;
+    text-align: left;
+    padding: 16px;
+    line-height: normal;
+}
+
+#gameSettingDiv li {
+    height: 128px;
+    padding-top: 8px;
+    border-style: none none dashed none;
+    border-width: 2px;
+    border-color: rgba(31, 31, 31, 0.5);
+    list-style: none;
+    padding-left: 16px;
+}
+
+.tagContainer {
+    display: inline-block;
+    border: 1px dashed gray;
+    line-height: 32px;
+    width: 256px;
+    height: 204px;
+    padding: 8px;
+}
+
+.tag {
+    display: inline-block;
+    border: 1px solid gray;
+    cursor: pointer;
+    padding: 2px;
+    margin: 4px;
+    width: 96px;
+    text-align: center;
+    transition: all 0.2s;
+}
+
+.tag:hover {
+    background-color: #bababa;
+}
+
+.tagSelected {
+    border: 1px solid orange;
+    background-color: lightblue !important;
+}
+
+.closeCardBnt {
+    position: absolute;
+    right: 32px;
+    top: 32px;
+    font-size: larger;
+    line-height: normal;
+}
+
+.closeCardBnt:hover{
+    cursor: pointer;
+}

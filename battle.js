@@ -7,7 +7,7 @@ let turn = 0
 let shipNum = 0
 class ships {
     constructor(h, w, pos) {
-        this.type="aliveShip"
+        this.type = "aliveShip"
         this.h = h
         this.w = w
         this.pos = pos
@@ -271,7 +271,7 @@ function addItemListener(element) {
                     setTimeout(() => {
                         element_.parentElement.parentElement.parentElement.parentElement.style.opacity = 0
                         setTimeout(() => {
-                            element_.parentElement.parentElement.parentElement.parentElement.style.display = "none"
+                            element_.parentElement.parentElement.parentElement.parentElement.remove()
                         }, 100);
                     }, 10);
                 }
@@ -422,30 +422,33 @@ function confirmPlace() {
         ws.send(JSON.stringify(["gameframe", { type: "confirm", id: roomId, faction: factionNow, data: data }]))
         document.querySelectorAll(".shipBlock").forEach(e => e.remove())
         gameStarted = true
-        document.getElementById("coonfirmPlaceBnt").style.display = "none"
+        document.getElementById("confirmPlaceBnt").style.display = "none"
     }
 }
 
 function canAttack() {
-    document.querySelectorAll(".mapBlock_").forEach(
-        element => {
-            if (!element.innerHTML) {
-                element.onmousemove = () => {
-                    element.style.borderColor = "orange"
-                }
-                element.onmouseleave = () => {
-                    element.style.borderColor = "black"
+    if (!gameended) {
+        document.querySelectorAll(".mapBlock_").forEach(
+            element => {
+                if (!element.innerHTML) {
+                    element.onmousemove = () => {
+                        element.style.borderColor = "orange"
+                    }
+                    element.onmouseleave = () => {
+                        element.style.borderColor = "black"
+
+                    }
+                    element.onmousedown = () => {
+                        attack(element.id.slice(1))
+                        element.style.borderColor = "black"
+
+                    }
 
                 }
-                element.onmousedown = () => {
-                    attack(element.id.slice(1))
-                    element.style.borderColor = "black"
-
-                }
-
             }
-        }
-    )
+        )
+
+    }
 }
 
 function stopAttack() {

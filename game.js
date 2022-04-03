@@ -8,9 +8,8 @@ let ws
 let roomId
 let factionNow
 let refreshInterval
-
-
-
+let gameended = false
+let roomToTag = {}
 
 function tryWS() {
     return new Promise(function (resolve, reject) {
@@ -27,61 +26,34 @@ function tryWS() {
             };
 
             ws.onmessage = function (evt) {
-                if (document.getElementById("loadingRoom")) { document.getElementById("loadingRoom").remove() }
                 var received_msg = JSON.parse(evt.data);
                 console.log(evt.data);
                 switch (received_msg[0]) {
                     case "gamelist":
-                        document.querySelector("#existedGames").remove()
-                        if (document.getElementById("stateInfo")) {
-                            document.getElementById("stateInfo").remove()
-                        }
-                        let existedGames = document.createElement("table")
-                        existedGames.id = "existedGames"
-                        let obj = document.createElement("tr")
-                        obj.innerHTML = '<td class="borderBottom">房间名</td><td class="borderBottom">状态</td><td class="borderBottom">唯一识别码</td><td class="borderBottom">进入</td>'
-                        existedGames.appendChild(obj)
-                        let gameArr = received_msg[1]
-                        for (let index = 0; index < gameArr.length; index++) {
-                            const element = gameArr[index];
+                        let table = document.createElement("table")
+                        table.id = "existedGames";
+                        table.innerHTML += ("<tr><td>房间名</td><td>唯一识别码</td><td>蓝方状态</td><td>红方状态</td><td>房间状态</td><td>所选合约</td><td>加入</td></tr>")
+                        for (let index = 0; index < received_msg[1].length; index++) {
+                            const lineData = received_msg[1][index];
                             let line = document.createElement("tr")
-                            let name = document.createElement("td")
-                            let state = document.createElement("td")
-                            let uuid = document.createElement("td")
-                            let bnt = document.createElement("a")
-                            name.innerHTML = element[0]
-                            uuid.innerHTML = element[1]
-                            for (let index2 = 2; index2 < element.length; index2++) {
-                                const st = element[index2];
-                                switch (st) {
-                                    case 0:
-                                        state.innerHTML += "-"
-                                        break;
-                                    case 1:
-                                        state.innerHTML += "O"
-                                        break
-                                    case 2:
-                                        state.innerHTML += "√"
-                                        break
-                                    default:
-                                        break;
+                            for (const key in lineData) {
+                                if (Object.hasOwnProperty.call(lineData, key)) {
+                                    const element = lineData[key];
+                                    let block = document.createElement("td")
+                                    if (key == "tags") {
+                                        block.innerHTML = `<a href="javascript:viewRoomInfo('${lineData["id"]}')">查看合约</a>`
+                                        roomToTag[lineData["id"]] = element
+                                    } else {
+                                        block.innerHTML = htmlspecialchars(element)
+                                    }
+                                    line.appendChild(block)
                                 }
-
                             }
-                            bnt.href = `javascript:selectGame('${element[1]}')`
-                            bnt.innerHTML = "→"
-                            line.append(name); line.append(state); line.append(uuid); line.append(bnt)
-                            existedGames.append(line)
-
+                            line.innerHTML += `<td><a href='javascript:selectGame("${lineData["id"]}")'>→</a></td>`
+                            table.appendChild(line)
                         }
-                        document.getElementById("existedGamesContainer").append(existedGames)
-
-                        let info = document.createElement("p")
-                        info.id = "stateInfo"
-                        info.innerHTML = "状态说明：三个字符依次为蓝方状态、红方状态和房间状态。“-”表示未开始，“O”表示已开始但缺席，“√”代表正常进行中"
-                        document.getElementById("existedGamesContainer").append(info)
-
-
+                        document.getElementById("existedGames").remove()
+                        document.getElementById("existedGamesContainer").appendChild(table)
                         break;
                     case "enterroom":
                         roomId = received_msg[1]
@@ -108,7 +80,7 @@ function tryWS() {
                                         break;
                                     case 2:
                                         return "在线"
-                                        break
+                                        break;
                                     default:
                                         break;
                                 }
@@ -119,7 +91,6 @@ function tryWS() {
                                 document.getElementById("turnInfoDiv").innerHTML = `第${received_msg[3][0]}回合，请放置`
                             } else {
                                 document.getElementById("turnInfoDiv").innerHTML = `第${received_msg[3][0]}回合，轮到${received_msg[3][1]}`
-
                             }
                             document.getElementById("playerInfo").innerHTML = `您是${factionNow}方`
                             document.getElementById("pregame").style.display = "none"
@@ -131,7 +102,6 @@ function tryWS() {
 
                             }, 10);
                         }, 510);
-
                         break
                     case "gameframe":
                         let dataPacket = received_msg[1]
@@ -150,45 +120,40 @@ function tryWS() {
                                     }
                                 }
                                 notice(`${faction()} 进入了游戏`)
-
                                 break;
                             case "playerconfirm":
                                 notice(`${dataPacket.data} 确认了布局`)
-
                                 break
                             case "next":
-                                if (dataPacket.data.turn == 1 & dataPacket.data.factionNow == "blue")
+                                if (dataPacket.data.turn == 1 & dataPacket.data.factionNow == "blue") {
                                     notice(`双方已确认布局，游戏开始`)
-
+                                }
                                 if (dataPacket.data.factionNow == factionNow & dataPacket.data.turn != 0) {
                                     notice("轮到你了")
                                     canAttack()
                                 }
-                                document.getElementById("turnInfoDiv").innerHTML = `第${dataPacket.data.turn}回合，轮到${dataPacket.data.factionNow}`
-
+                                if (dataPacket.data.turn != 0) {
+                                    document.getElementById("turnInfoDiv").innerHTML = `第${dataPacket.data.turn}回合，轮到${dataPacket.data.factionNow}`
+                                }
                                 break
                             case "attfail":
                                 if (dataPacket.data.faction == factionNow) {
                                     document.getElementById("o" + dataPacket.data.pos).innerHTML = "x"
                                     playAudio("/res/b_ui_mark.ogg")
-
                                 } else {
                                     document.getElementById("b" + dataPacket.data.pos).innerHTML = "x"
                                     playAudio("/res/b_ui_mark.ogg")
-
                                 }
                                 break
                             case "attsuccess":
                                 if (dataPacket.data.faction == factionNow) {
                                     document.getElementById("o" + dataPacket.data.pos).innerHTML = "o"
                                     playAudio("/res/b_ui_mark.ogg")
-
                                 } else {
                                     document.getElementById("b" + dataPacket.data.pos).innerHTML = "o"
                                     let posAtt = id2pos(dataPacket.data.pos)
                                     mapArr[posAtt[0]][posAtt[1]].destroy(dataPacket.data.pos)
                                     playAudio("/res/b_ui_alarmenter.ogg")
-
                                 }
                                 break
                             case "shipSink":
@@ -198,29 +163,27 @@ function tryWS() {
                                         const id = "o" + dataPacket.data.shipid[index];
                                         document.getElementById(id).style.borderColor = ramColor
                                     }
-
                                 }
                                 break
                             case "playersuccess":
                                 musicPlaying.forEach(obj => obj.pause())
                                 document.getElementById("winnerNameDiv").innerHTML = dataPacket.faction
-
                                 if (dataPacket.faction == factionNow) {
                                     notice("你胜利了！^_^")
                                     playAudio("/res/b_ui_win.ogg")
                                     setTimeout(() => {
                                         audioRes[resToGet.indexOf("/res/m_bat_victory_intro.ogg")].play("switch", "/res/m_bat_victory_loop.ogg")
-
                                     }, 3000);
-
                                 } else {
                                     notice("你失败了！XD")
-
                                     audioRes[resToGet.indexOf("/res/m_bat_failed_intro_voice.ogg")].play("switch", "/res/m_bat_failed_loop.ogg")
-
                                 }
-                                document.getElementById("gameEndDiv").style.display="block"
+                                document.getElementById("gameEndDiv").style.display = "block"
+                                gameended = true
                                 break;
+                            case "map":
+
+                                break
                             default:
                                 break;
                         }
@@ -257,6 +220,7 @@ class musicObj {
     play(option, value) {
         let ado = document.createElement("audio")
         ado.src = this.src
+        ado.volume = 0.5
         if (option == "switch") {
             ado.onended = () => audioRes[resToGet.indexOf(value)].play("loop")
         }
@@ -265,16 +229,11 @@ class musicObj {
         }
         musicPlaying.push(ado)
         ado.play()
-
     }
-}
-
-window.onload = () => {
 }
 
 async function startLoad() {
     document.getElementById("loadBnt").style.display = "none"
-
     for (let index = 0; index < resToGet.length; index++) {
         const element = resToGet[index];
         await preload(element, index)
@@ -284,7 +243,6 @@ async function startLoad() {
     document.querySelectorAll("button").forEach(element => {
         element.addEventListener("click", () => playAudio("/res/g_ui_confirm.ogg"))
     });
-
     document.querySelector("#loginBnt").style.display = "inline-block"
     audioRes[resToGet.indexOf("/res/m_sys_title_intro.ogg")].play("switch", "/res/m_sys_title_loop.ogg")
 }
@@ -311,7 +269,6 @@ function preload(url, index) {
                             file = xhr.response
                             fileOK()
                         }
-
                     }
                     xhr.open("GET", url, true);
                     xhr.send();
@@ -347,22 +304,23 @@ function login() {
     }, 501);
     refreshInterval = setInterval(() => {
         ws.send(JSON.stringify(["getgames"]))
-
     }, 4000);
     tryWS()
-
 }
 
 function selectGame(id) {
     console.log(id);
     ws.send(JSON.stringify(["gselect", id]))
-
 }
 
 function createGame() {
     let name = document.getElementById("gameNameToCreate").value
+    isCreatingRoom = true
+    tagList = []
     if (name.length >= 3) {
-        ws.send(JSON.stringify(["creategame", name]))
+        document.getElementById("gameSettingDiv").style.display = "block";
+        document.getElementById("createRoomBnt").style.display = "block";
+        refreshTagSelect()
     } else { alert("需要至少3位数的房间名") }
 }
 
@@ -370,17 +328,20 @@ function joinBlue() {
     ws.send(JSON.stringify(["genter", roomId, 0]))
     factionNow = "blue"
 }
+
 function joinRed() {
     ws.send(JSON.stringify(["genter", roomId, 1]))
     factionNow = "red"
 }
 
 function htmlspecialchars(str) {
-    str = str.replace(/&amp;/g, '&');
-    str = str.replace(/&lt;/g, '<');
-    str = str.replace(/&gt;/g, '>');
-    str = str.replace(/&quot;/g, "''");
-    str = str.replace(/&#039;/g, "'");
+    str = String(str)
+    str = str.replace(" ", "&nbsp")
+    str = str.replace("&", "&amp")
+    str = str.replace("<", "&lt")
+    str = str.replace(">", "&gt")
+    str = str.replace('"', "&quot")
+    str = str.replace("'", "&apos")
     return str;
 }
 
@@ -392,7 +353,6 @@ function notice(content) {
     document.getElementById("noticeContainer").appendChild(nNotice)
     setTimeout(() => {
         nNotice.style.opacity = 1
-
     }, 10);
     setTimeout(() => {
         nNotice.style.opacity = 0
@@ -401,5 +361,15 @@ function notice(content) {
             nNotice.remove()
         }, 350);
     }, 2500);
-
 }
+
+function sendGameCreateRequest() {
+    let name = document.getElementById("gameNameToCreate").value
+    let tagListToSend = tagList.filter(e => e && e.trim())
+    ws.send(JSON.stringify(["creategame", { name: name, tags: tagListToSend }]))
+    document.getElementById("gameSettingDiv").style.display = "none";
+    document.getElementById("createRoomBnt").style.display = "none";
+    isCreatingRoom = false
+    tagList = []
+}
+

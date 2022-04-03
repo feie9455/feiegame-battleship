@@ -35,7 +35,10 @@
             <div class="progress-bar" role="progressbar" style="width: 0%; height: 10px" aria-valuenow="0"
                 aria-valuemin="0" aria-valuemax="100" id="progressSingle" aria-label="Resources load progress"></div>
         </div>
+        <button onclick='localforage.clear().then(()=>notice("清理成功，将需要重新下载资源"))'
+            style="position: absolute;top: 16px;right: 16px;">清理缓存</button>
     </div>
+
     <div id="pregame">
         <div id="existedGamesContainer">
             <h1>正在进行的游戏</h1>
@@ -53,20 +56,107 @@
     </div>
     <div id="chooseFaction" style="display: none;" class="card">
         <h2 style="display: inline-block;">选择一方</h2>
-        <h2 onclick="document.getElementById('chooseFaction').style.display='none';document.getElementById('chooseBlueBnt').style.display='none';document.getElementById('chooseRedBnt').style.display='none'"
-            style="display: inline;position: relative;left: 10vw;bottom: 6vh;">x</h2>
+        <p onclick="document.getElementById('chooseBlueBnt').style.display='none';document.getElementById('chooseRedBnt').style.display='none'" class="closeCardBnt">x</p>
         <br><button style="display: none;" id="chooseBlueBnt" onclick="joinBlue()">蓝方</button>
         <button style="display: none;" id="chooseRedBnt" onclick="joinRed()">红方</button>
     </div>
     <div id="WSLoadDiv" style="display: none;z-index: 100;" class="card">
-        <h2>尝试与神经网络建立WebSocket链接</h2>   
+        <h2>尝试与神经网络建立WebSocket链接</h2>
         <div class="loader"></div>
         <div class="loader"></div>
         <div class="loader"></div>
     </div>
+
+    <div class="card" id="gameSettingDiv" style="display: none;">
+        <p onclick='document.getElementById("createRoomBnt").style.display = "none";isCreatingRoom=false'
+            class="closeCardBnt">
+            X</p>
+        <li style="height: 328px;">
+            <h2>可选合约：</h2>
+            <div style="overflow-x: scroll;overflow-y: hidden;">
+                <div style="width: max-content;">
+                    <div class="tagContainer">
+                        <h3>航母</h3>
+                        <div class="tag" data-description="全面开战后：每回合+1攻击次数" id="ta11">快速射击Ⅰ</div><br>
+                        <div class="tag" data-description="全面开战后：每回合+1攻击次数；获得单次技能：连续攻击6次" id="ta21">快速射击Ⅱ</div>
+                        <div class="tag" data-description="全面开战后：每回合+1攻击次数；船只长度+1；获得35%闪避" id="ta22">机动装甲Ⅰ</div><br>
+                        <div class="tag" data-description="全面开战后：每回合+2攻击次数；获得单次技能：连续攻击10次，且每次攻击有20%几率溅射" id="ta31">快速射击Ⅲ
+                        </div>
+                        <div class="tag" data-description="全面开战后：每回合+1攻击次数；船只长度+1；获得60%闪避；获得双次技能：探明十字形3格范围内敌方视野"
+                            id="ta32">机动装甲Ⅱ</div><br>
+                    </div>
+                    <div class="tagContainer">
+                        <h3>巡洋舰</h3>
+                        <div class="tag" data-description="全面开战后：获得单次技能：对一整行或列进行扫射" id="tb11">激光扫射Ⅰ</div><br>
+                        <div class="tag" data-description="全面开战后：获得单次技能：对一整行与列进行扫射" id="tb21">激光扫射Ⅱ</div><br>
+                        <div class="tag" data-description="全面开战后：获得单次技能：摧毁一整行与列所有船只" id="tb31">激光扫射Ⅲ</div><br>
+                    </div>
+                    <div class="tagContainer">
+                        <h3>潜艇</h3>
+                        <div class="tag" data-description="全面开战后：获得单次技能：摧毁十字形3格范围内所有船只" id="tc11">区域轰炸Ⅰ</div><br>
+                        <div class="tag" data-description="全面开战后：获得单次技能：摧毁3x3范围内所有船只" id="tc21">区域轰炸Ⅱ</div>
+                        <div class="tag" data-description="全面开战后：获得单次技能：摧毁十字形5格范围内所有船只；获得15%闪避" id="tc22">数量取胜Ⅰ</div>
+                        <br>
+                        <div class="tag" data-description="全面开战后：获得双次技能：摧毁十字形5格范围内所有船只；获得40%闪避" id="tc31">区域轰炸Ⅲ</div>
+                        <br>
+                    </div>
+                    <div class="tagContainer">
+                        <h3>地图</h3>
+                        <div class="tag" data-description="地图扩大至9x9" id="td11">规模作战Ⅰ</div><br>
+                        <div class="tag" data-description="地图扩大至10x10" id="td21">规模作战Ⅱ</div><br>
+                        <div class="tag" data-description="地图扩大至12x12" id="td31">规模作战Ⅲ</div><br>
+                    </div>
+                    <div class="tagContainer">
+                        <h3>攻击次数</h3>
+                        <div class="tag" data-description="每4回合获得一次额外攻击" id="te11">全面战争Ⅰ</div><br>
+                        <div class="tag" data-description="每2回合获得一次额外攻击" id="te21">全面战争Ⅱ</div><br>
+                        <div class="tag" data-description="每回合获得一次额外攻击" id="te31">全面战争Ⅲ</div><br>
+                    </div>
+                    <div class="tagContainer">
+                        <h3>额外闪避</h3>
+                        <div class="tag" data-description="所有单位获得10%闪避" id="tf11">伏击战术Ⅰ</div><br>
+                        <div class="tag" data-description="所有单位获得20%闪避" id="tf21">伏击战术Ⅱ</div><br>
+                        <div class="tag" data-description="所有单位获得35%闪避" id="tf31">伏击战术Ⅲ</div><br>
+                    </div>
+                    <div class="tagContainer">
+                        <h3>空中支援</h3>
+                        <div class="tag" data-description="每3回合在地图随机位置额外攻击一次" id="tg11">空中支援Ⅰ</div><br>
+                        <div class="tag" data-description="每2回合在地图随机位置额外攻击一次" id="tg21">空中支援Ⅱ</div><br>
+                        <div class="tag" data-description="每回合在地图随机位置额外攻击一次" id="tg31">空中支援Ⅲ</div><br>
+                    </div>
+                    <div class="tagContainer">
+                        <h3>编队优化</h3>
+                        <div class="tag" data-description="巡洋舰数量+1" id="th11">编队优化Ⅰ</div><br>
+                        <div class="tag" data-description="巡洋舰、潜艇数量+1" id="th21">编队优化Ⅱ</div><br>
+                        <div class="tag" data-description="航母、巡洋舰、潜艇数量+1" id="th31">编队优化Ⅲ</div><br>
+                    </div>
+                    <div class="tagContainer">
+                        <h3>杂项</h3>
+                        <div class="tag" data-description="地图内随机出现少量不可部署位" id="ti11">险峻地势</div><br>
+                        <div class="tag" data-description="获得补给舰x3，当场上存在2只及以上补给舰时，每回合获得一次额外攻击" id="ti21">后勤保障</div>
+                        <div class="tag" data-description="立即获得单次技能：探明十字形3格范围内敌方视野" id="ti22">谍战风云</div><br>
+                        <div class="tag" data-description="所有船只受到2次未闪避的攻击后立刻被击沉" id="ti31">摧枯拉朽</div><br>
+                    </div>
+                </div>
+
+            </div>
+        </li>
+        <li id="tagDescription" style="height: 96px;"></li>
+        <li style="border: 0;">
+            <h2 id="tagLevelDiv">合约等级：0</h2>
+            <h2>已选合约：</h2>
+            <div style="overflow-y: scroll;height: 120px;">
+                <p id="selectedTags"></p>
+
+            </div>
+        </li>
+        <button style="position: absolute;right: 32px;bottom: 32px;display: none;" onclick="sendGameCreateRequest()"
+            id="createRoomBnt">创建</button>
+    </div>
+
     <div id="gameEndDiv" style="display: none;z-index: 80;" class="card">
         <h2>游戏结束，胜利者：</h2>
-        <h1 id="winnerNameDiv"></h1>   
+        <h1 id="winnerNameDiv"></h1>
         <button onclick="window.location.reload()">再来一局</button>
 
     </div>
@@ -93,13 +183,15 @@
             <p id="redStateDiv"></p>
             </p>
             <br>
-            <button onclick="confirmPlace()" id="coonfirmPlaceBnt">确认布局</button>
+            <button onclick="confirmPlace()" id="confirmPlaceBnt">确认布局</button>
 
         </div>
         <div id="item">
             <button onclick="itemsGetBack()">归位</button>
         </div>
     </div>
+
+
     <div id="noticeContainer">
 
     </div>
@@ -108,4 +200,5 @@
 <script src="/js/localforage.min.js"></script>
 <script src="./battle.js"></script>
 <script src="./ui.js"></script>
+
 </html>
