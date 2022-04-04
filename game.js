@@ -20,7 +20,7 @@ function tryWS() {
             if (!WebSocket) {
                 alert("您的浏览器不支持Websocket，请升级您的浏览器。")
             }
-            ws = new WebSocket("wss://127.0.0.1:9454")
+            ws = new WebSocket(`wss://${window.location.host}:9454`)
             ws.onopen = function () {
                 document.getElementById("WSLoadDiv").style.display = "none"
                 console.log(`WS connection OK.`);
