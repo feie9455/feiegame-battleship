@@ -21,27 +21,23 @@ let tagLevel = 0
 let isCreatingRoom = false
 document.querySelectorAll(".tag").forEach(e => {
     e.onmousemove = () => {
-        if (isCreatingRoom) {
-            document.getElementById("tagDescription").innerHTML = "合约内容：" + e.getAttribute("data-description")
-            if (!e.id.includes("ti")) {
-                e.parentElement.querySelectorAll(".tag").forEach(element => {
-                    if (element != e) {
-                        element.style.border = "1px solid red";
-                    }
-                });
-            }
+        document.getElementById("tagDescription").innerHTML = "合约内容：" + e.getAttribute("data-description")
+        if (!e.id.includes("ti")) {
+            e.parentElement.querySelectorAll(".tag").forEach(element => {
+                if (element != e) {
+                    element.style.border = "1px solid red";
+                }
+            });
         }
     }
     e.onmouseleave = () => {
-        if (isCreatingRoom) {
-            document.getElementById("tagDescription").innerHTML = ""
-            if (!e.id.includes("ti")) {
-                e.parentElement.querySelectorAll(".tag").forEach(element => {
-                    if (element != e) {
-                        element.style.border = ""
-                    }
-                });
-            }
+        document.getElementById("tagDescription").innerHTML = ""
+        if (!e.id.includes("ti")) {
+            e.parentElement.querySelectorAll(".tag").forEach(element => {
+                if (element != e) {
+                    element.style.border = ""
+                }
+            });
         }
     }
     e.onmousedown = () => {
@@ -84,9 +80,9 @@ function refreshTagSelect() {
     document.getElementById("tagLevelDiv").innerHTML = "合约等级：" + tagLevel
 }
 
-document.querySelectorAll(".closeCardBnt").forEach(e=>{
-    e.addEventListener("click",()=>{
-        e.parentElement.style.display="none"
+document.querySelectorAll(".closeCardBnt").forEach(e => {
+    e.addEventListener("click", () => {
+        e.parentElement.style.display = "none"
     })
 })
 

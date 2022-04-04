@@ -3,20 +3,18 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Feiegame-battleship[offline]</title>
-    <link rel="stylesheet" href="main.css">
-
+    <link rel="stylesheet" href="./main.css">
+    <link rel="icon" href="./icon.png">
+    <link rel="apple-touch-icon" href="./icon.png">
+    <link rel="manifest" href="./manifest.webmanifest" />
 </head>
 <style>
 
 </style>
 
 <body>
-    <div>
 
-    </div>
     <div id="loadDiv" style="text-align: center;">
         <h1 style="margin-top: 40vh;">Feiegame - battleship</h1><br>
 
@@ -40,12 +38,13 @@
     </div>
 
     <div id="pregame">
-        <div id="existedGamesContainer">
+        <div>
             <h1>正在进行的游戏</h1>
-            <p id="loadingRoom">正在获取，请稍候。</p>
-
-            <table id="existedGames">
-            </table>
+            <p id="loadingRoomNotice">正在获取，请稍候。</p>
+            <div style="height: 60vh;overflow: scroll;" id="existedGamesContainer">
+                <table id="existedGames">
+                </table>
+            </div>
         </div>
         <div id="createGamesDiv">
             <h1>创建房间</h1>
@@ -54,12 +53,15 @@
             <button onclick="createGame()">创建</button>
         </div>
     </div>
+
     <div id="chooseFaction" style="display: none;" class="card">
         <h2 style="display: inline-block;">选择一方</h2>
-        <p onclick="document.getElementById('chooseBlueBnt').style.display='none';document.getElementById('chooseRedBnt').style.display='none'" class="closeCardBnt">x</p>
+        <p onclick="document.getElementById('chooseBlueBnt').style.display='none';document.getElementById('chooseRedBnt').style.display='none'"
+            class="closeCardBnt">x</p>
         <br><button style="display: none;" id="chooseBlueBnt" onclick="joinBlue()">蓝方</button>
         <button style="display: none;" id="chooseRedBnt" onclick="joinRed()">红方</button>
     </div>
+
     <div id="WSLoadDiv" style="display: none;z-index: 100;" class="card">
         <h2>尝试与神经网络建立WebSocket链接</h2>
         <div class="loader"></div>
@@ -158,22 +160,22 @@
         <h2>游戏结束，胜利者：</h2>
         <h1 id="winnerNameDiv"></h1>
         <button onclick="window.location.reload()">再来一局</button>
-
     </div>
-
 
     <div id="game" style="display: none;opacity: 0;">
         <div style="width: 49%;display: inline-block;text-align: center;">
             <div id="main" style="width: fit-content;display: inline-block;">
             </div>
-
         </div>
         <div style="width: 49%;display: inline-block;text-align: center;">
-
             <div id="opponent" style="width: fit-content;display: inline-block;">
             </div>
         </div>
+        <div id="item">
+            <button onclick="itemsGetBack()">归位</button>
+        </div>
         <div id="gameinfo">
+            <p id="roomInfo"></p><br>
             <p id="playerInfo"></p><br>
             <p id="turnInfoDiv">正在获取回合信息</p><br>
             <p>蓝方：
@@ -184,21 +186,18 @@
             </p>
             <br>
             <button onclick="confirmPlace()" id="confirmPlaceBnt">确认布局</button>
+        </div>
 
-        </div>
-        <div id="item">
-            <button onclick="itemsGetBack()">归位</button>
-        </div>
     </div>
 
+    <div id="noticeContainer"></div>
 
-    <div id="noticeContainer">
-
-    </div>
 </body>
 <script src="./game.js"></script>
 <script src="/js/localforage.min.js"></script>
 <script src="./battle.js"></script>
 <script src="./ui.js"></script>
+<script src="./system.js"></script>
+
 
 </html>

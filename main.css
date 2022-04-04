@@ -1,4 +1,6 @@
 body {
+    -ms-user-select: none;
+    -webkit-user-select: none;
     user-select: none;
     overflow: hidden;
     text-align: center;
@@ -11,13 +13,30 @@ body {
     background-color: rgba(173, 216, 230, 0.9);
     border-radius: 2px;
     border-style: dashed;
-    width: 90vw;
+    width: 55vw;
     height: 300px;
     display: inline-block;
     position: fixed;
     bottom: 5vw;
     left: 5vw;
 
+}
+
+#gameinfo {
+    background-color: rgba(173, 216, 230, 0.9);
+    border-radius: 2px;
+    border-style: dashed;
+    width: 30vw;
+    height: 300px;
+    display: inline-block;
+    line-height: 40px;
+    position: fixed;
+    bottom: 5vw;
+    right: 5vw;
+}
+
+#gameinfo p {
+    display: inline;
 }
 
 .shipBlock {
@@ -55,6 +74,7 @@ body {
     top: 0px;
     transition-property: opacity, transform;
     transition-duration: 0.1s, 0.2s;
+    width: -moz-fit-content;
     width: fit-content;
 }
 
@@ -146,23 +166,6 @@ div {
 
 }
 
-#gameinfo {
-    background-color: rgba(173, 216, 230, 0.9);
-    border-radius: 2px;
-    border-style: dashed;
-    width: 20vw;
-    height: 300px;
-    display: inline-block;
-    position: fixed;
-    bottom: 400px;
-    left: 40vw;
-    line-height: 50px;
-
-}
-
-#gameinfo p {
-    display: inline;
-}
 
 #noticeContainer {
     position: fixed;
@@ -287,6 +290,6 @@ div {
     line-height: normal;
 }
 
-.closeCardBnt:hover{
+.closeCardBnt:hover {
     cursor: pointer;
 }

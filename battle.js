@@ -75,51 +75,50 @@ class b4shipW extends b4ship {
 }
 
 const item = document.getElementById("item")
-const height = 8
-const width = 8
+let height
+let width
 const id2pos = id => [Math.floor(id / width), id % width]
 const pos2id = pos => pos[0] * width + pos[1]
 
-createShip(1, 4)
-createShip(1, 3)
-createShip(1, 3)
-createShip(1, 2)
-createShip(1, 2)
-createShip(1, 2)
 const mapArr = []
-for (let index = 0; index < height; index++) {
-    let line = []
-    for (let index = 0; index < width; index++) {
-        line.push(null)
 
-    }
-    mapArr.push(line)
-}
-let table = document.createElement("table")
-for (let h = 0; h < height; h++) {
-    let line = document.createElement("tr")
-    for (let w = 0; w < width; w++) {
-        let block = document.createElement("td")
-        block.className = "mapBlock"
-        block.id = "b" + (h * width + w)
-        line.appendChild(block)
-    }
-    table.appendChild(line)
-}
-document.getElementById("main").append(table)
+function createMap() {
+    for (let index = 0; index < height; index++) {
+        let line = []
+        for (let index = 0; index < width; index++) {
+            line.push(null)
 
-table = document.createElement("table")
-for (let h = 0; h < height; h++) {
-    let line = document.createElement("tr")
-    for (let w = 0; w < width; w++) {
-        let block = document.createElement("td")
-        block.className = "mapBlock_"
-        block.id = "o" + (h * width + w)
-        line.appendChild(block)
+        }
+        mapArr.push(line)
     }
-    table.appendChild(line)
+    let table = document.createElement("table")
+    for (let h = 0; h < height; h++) {
+        let line = document.createElement("tr")
+        for (let w = 0; w < width; w++) {
+            let block = document.createElement("td")
+            block.className = "mapBlock"
+            block.id = "b" + (h * width + w)
+            line.appendChild(block)
+        }
+        table.appendChild(line)
+    }
+    document.getElementById("main").append(table)
+
+    table = document.createElement("table")
+    for (let h = 0; h < height; h++) {
+        let line = document.createElement("tr")
+        for (let w = 0; w < width; w++) {
+            let block = document.createElement("td")
+            block.className = "mapBlock_"
+            block.id = "o" + (h * width + w)
+            line.appendChild(block)
+        }
+        table.appendChild(line)
+    }
+    document.getElementById("opponent").append(table)
+    document.getElementById("main").querySelectorAll(".mapBlock").forEach(element => addMapListener(element))
+
 }
-document.getElementById("opponent").append(table)
 
 function addItemListener(element) {
     element.addEventListener("mouseover", () => {
@@ -131,15 +130,24 @@ function addItemListener(element) {
         })
 
     })
-    element.addEventListener("dblclick", () => cycle(element))
+    element.addEventListener("dblclick", () => {
+        setTimeout(() => {
+            cycle(element)
+        }, 100);
+    })
     element.addEventListener("mousedown", () => {
+
+
+    })
+    element.addEventListener("touchstart", () => {
+
+
+    })
+    element.onmousedown = function (event) {
         let offx = (window.event.clientX - getElementLeft(element.parentElement.parentElement.parentElement.parentElement))
         let offy = (window.event.clientY - getElementTop(element.parentElement.parentElement.parentElement.parentElement))
         element.parentElement.parentElement.parentElement.parentElement.style.transformOrigin = `${offx}px ${offy}px`
         element.parentElement.parentElement.parentElement.parentElement.style.transform = "scale(1.8,1.8)"
-
-    })
-    element.onmousedown = function (event) {
         let mouseoverE = document.elementsFromPoint(event.clientX, event.clientY)[3]
         if (mouseoverE) {
             if (mouseoverE.id.slice(0, 1) == "b" & mouseoverE.className == "mapBlock") {
@@ -257,8 +265,11 @@ function addItemListener(element) {
                                 default:
                                     break;
                             }
+                            let ramColor = createRamColor()
                             for (let index = 0; index < eW; index++) {
                                 document.getElementById("b" + (mouseover - pos + index)).style.backgroundColor = factionNow
+                                document.getElementById("b" + (mouseover - pos + index)).style.borderColor = ramColor
+
                                 document.getElementById("b" + (mouseover - pos + index)).classList.add("canRemove")
                                 mapArr[Math.floor((mouseover - pos + index) / width)][(mouseover - pos + index) % width] = thisShip
                             }
@@ -268,6 +279,7 @@ function addItemListener(element) {
                 }
 
                 if (success) {
+                    element_.parentElement.parentElement.parentElement.parentElement.setAttribute("data-used", "true")
                     setTimeout(() => {
                         element_.parentElement.parentElement.parentElement.parentElement.style.opacity = 0
                         setTimeout(() => {
@@ -278,9 +290,160 @@ function addItemListener(element) {
             }
         }
     }
+    element.ontouchstart = function (event) {
+        element.parentElement.querySelectorAll("td").forEach(e => e.style.borderColor = factionNow)
+        let offx = (event.targetTouches[0].clientX - getElementLeft(element.parentElement.parentElement.parentElement.parentElement))
+        let offy = (event.targetTouches[0].clientY - getElementTop(element.parentElement.parentElement.parentElement.parentElement))
+        element.parentElement.parentElement.parentElement.parentElement.style.transformOrigin = `${offx}px ${offy}px`
+        element.parentElement.parentElement.parentElement.parentElement.style.transform = "scale(1.8,1.8)"
+        let mouseoverE = document.elementsFromPoint(event.targetTouches[0].clientX, event.targetTouches[0].clientY)[3]
+        if (mouseoverE) {
+            if (mouseoverE.id.slice(0, 1) == "b" & mouseoverE.className == "mapBlock") {
+                mouseover = mouseoverE.id.slice(1)
+            } else {
+                mouseover = undefined
+            }
+        }
+        var event = event || window.event;
+        var diffX = event.targetTouches[0].clientX
+        var diffY = event.targetTouches[0].clientY
+        let Y0 = parseInt(element.parentElement.parentElement.parentElement.parentElement.style.top)
+        let X0 = parseInt(element.parentElement.parentElement.parentElement.parentElement.style.left)
+        let element_ = element
+        let objx
+        let objy
+        let refresh = function (event) {
+            element_.parentElement.parentElement.parentElement.parentElement.style.top = objy
+            element_.parentElement.parentElement.parentElement.parentElement.style.left = objx
+        }
+        if (typeof element_.setCapture !== 'undefined') {
+            this.setCapture();
+        }
+        document.ontouchmove = function (event) {
+            var event = event || window.event;
+            objx = X0 + event.targetTouches[0].clientX - diffX + "px"
+            objy = Y0 + event.targetTouches[0].clientY - diffY + "px"
+            refresh(event)
+            mouseoverE = document.elementsFromPoint(event.targetTouches[0].clientX, event.targetTouches[0].clientY)[3]
+            if (mouseoverE) {
+                if (mouseoverE.id.slice(0, 1) == "b" & mouseoverE.className == "mapBlock") {
+                    mouseover = mouseoverE.id.slice(1)
+                } else {
+                    mouseover = undefined
+                }
+            }
+        }
+        document.ontouchend = function (event) {
+            element.parentElement.querySelectorAll("td").forEach(e => {
+                e.style.borderColor = "black";
+            })
+
+            element.parentElement.parentElement.parentElement.parentElement.style.transform = "scale(1,1)";
+            this.ontouchmove = null;
+            this.ontouchend = null;
+            if (typeof element_.releaseCapture != 'undefined') {
+                element_.releaseCapture();
+            }
+            console.log(mouseover);
+            if (mouseover) {
+                let success = false
+                let eW = element.parentElement.parentElement.parentElement.parentElement.getAttribute("width")
+                let eH = element.parentElement.parentElement.parentElement.parentElement.getAttribute("height")
+                let isConflict = false
+                if (eH >= eW) {
+                    let pos = getPosH(element)
+                    let mouseoverLine = id2pos(mouseover)[0]
+                    if (mouseoverLine >= pos & mouseoverLine + (eH - pos - 1) <= height - 1) {
+                        for (let index = 0; index < eH; index++) {
+                            if (document.getElementById("b" + (mouseover - width * pos + index * width)).style.backgroundColor == factionNow) { isConflict = true }
+                        }
+                        if (!isConflict) {
+                            let posToPut = []
+                            for (let index = 0; index < eH; index++) {
+                                posToPut.push(mouseover - width * pos + index * width)
+                            }
+                            let thisShip
+                            switch (Number(eH)) {
+                                case 1:
+                                    thisShip = new b1ship(posToPut)
+                                    break;
+                                case 2:
+                                    thisShip = new b2shipH(posToPut)
+                                    break
+                                case 3:
+                                    thisShip = new b3shipH(posToPut)
+                                    break
+                                case 4:
+                                    thisShip = new b4shipH(posToPut)
+                                    break
+                                default:
+                                    break;
+                            }
+                            for (let index = 0; index < eH; index++) {
+                                document.getElementById("b" + (mouseover - width * pos + index * width)).style.backgroundColor = factionNow
+                                document.getElementById("b" + (mouseover - width * pos + index * width)).classList.add("canRemove")
+                                mapArr[Math.floor((mouseover - width * pos + index * width) / width)][(mouseover - width * pos + index * width) % width] = thisShip
+                            }
+                            this.onmousedown = null
+                            success = true
+                        }
+                    }
+                } else {
+                    let pos = getPosW(element)
+
+                    if (pos <= mouseover % width & (mouseover % width) - pos <= (width - eW)) {
+                        for (let index = 0; index < eW; index++) {
+                            if (document.getElementById("b" + (mouseover - pos + index)).style.backgroundColor == factionNow) { isConflict = true }
+                        }
+                        if (!isConflict) {
+                            let posToPut = []
+                            for (let index = 0; index < eW; index++) {
+                                posToPut.push(mouseover - pos + index)
+                            }
+                            let thisShip
+                            switch (Number(eW)) {
+                                case 1:
+                                    thisShip = new b1ship(posToPut)
+                                    break;
+                                case 2:
+                                    thisShip = new b2shipW(posToPut)
+                                    break
+                                case 3:
+                                    thisShip = new b3shipW(posToPut)
+                                    break
+                                case 4:
+                                    thisShip = new b4shipW(posToPut)
+                                    break
+                                default:
+                                    break;
+                            }
+                            let ramColor = createRamColor()
+                            for (let index = 0; index < eW; index++) {
+                                document.getElementById("b" + (mouseover - pos + index)).style.backgroundColor = factionNow
+                                document.getElementById("b" + (mouseover - pos + index)).style.borderColor = ramColor
+                                document.getElementById("b" + (mouseover - pos + index)).classList.add("canRemove")
+                                mapArr[Math.floor((mouseover - pos + index) / width)][(mouseover - pos + index) % width] = thisShip
+                            }
+                            success = true
+                        }
+                    }
+                }
+
+                if (success) {
+                    element_.parentElement.parentElement.parentElement.parentElement.setAttribute("data-used", "true")
+                    setTimeout(() => {
+                        element_.parentElement.parentElement.parentElement.parentElement.style.opacity = 0
+                        setTimeout(() => {
+                            element_.parentElement.parentElement.parentElement.parentElement.remove()
+                        }, 100);
+                    }, 10);
+                }
+            }
+        }
+    }
+
 }
 
-document.getElementById("main").querySelectorAll(".mapBlock").forEach(element => addMapListener(element))
 function addMapListener(element) {
     element.addEventListener("click", () => {
         let thisId = element.id.slice(1)
@@ -291,6 +454,8 @@ function addMapListener(element) {
                     const position = clickedE.pos[index];
                     mapArr[id2pos(position)[0]][id2pos(position)[1]] = null
                     document.getElementById("b" + position).style.backgroundColor = ""
+                    document.getElementById("b" + position).style.borderColor = ""
+
                     document.getElementById("b" + position).classList.remove("canRemove")
                 }
                 createShip(clickedE.h, clickedE.w)
@@ -298,7 +463,6 @@ function addMapListener(element) {
         }
     })
 }
-
 
 function getPosW(element) {
     let pos = 0
@@ -363,13 +527,13 @@ function createShip(h, w, posX, posY) {
     }
     return item.appendChild(newShip)
 }
+
 function cycle(element) {
     setTimeout(() => {
-        if (element) {
+        if (element.parentElement.parentElement.parentElement.parentElement.getAttribute("data-used") != "true") {
             let thisShip = element.parentElement.parentElement.parentElement.parentElement
             createShip(thisShip.getAttribute("width"), thisShip.getAttribute("height"), thisShip.style.left, thisShip.style.top)
             thisShip.remove()
-
         }
     }, 100);
 }

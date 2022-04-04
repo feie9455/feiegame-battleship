@@ -10,6 +10,8 @@ let factionNow
 let refreshInterval
 let gameended = false
 let roomToTag = {}
+let roomTags = []
+let roomName = ""
 
 function tryWS() {
     return new Promise(function (resolve, reject) {
@@ -30,6 +32,9 @@ function tryWS() {
                 console.log(evt.data);
                 switch (received_msg[0]) {
                     case "gamelist":
+                        if (document.getElementById("loadingRoomNotice")) {
+                            document.getElementById("loadingRoomNotice").remove()
+                        }
                         let table = document.createElement("table")
                         table.id = "existedGames";
                         table.innerHTML += ("<tr><td>房间名</td><td>唯一识别码</td><td>蓝方状态</td><td>红方状态</td><td>房间状态</td><td>所选合约</td><td>加入</td></tr>")
@@ -62,12 +67,25 @@ function tryWS() {
                         if (received_msg[3] != 2) { document.getElementById('chooseRedBnt').style.display = "inline-block" }
                         break;
                     case "entergame":
+                        roomTags = received_msg[1].tags
                         clearInterval(refreshInterval)
                         document.getElementById("pregame").style.opacity = 0
                         document.getElementById("chooseFaction").style.opacity = 0
-                        if (received_msg[3][0] != 0) {
+                        if (received_msg[1].nowTurn != 0) {
                             gameStarted = true
                         }
+                        if (roomTags.includes("td11")) {
+                            height = width = 9
+                        } else if (roomTags.includes("td21")) {
+                            height = width = 10
+                        } else if (roomTags.includes("td31")) {
+                            height = width = 12
+                        } else {
+                            height = width = 8
+                        }
+
+                        createMap()
+
                         setTimeout(() => {
                             musicPlaying.forEach(obj => obj.pause())
                             const num2State = num => {
@@ -85,12 +103,15 @@ function tryWS() {
                                         break;
                                 }
                             }
-                            document.getElementById("blueStateDiv").innerHTML = num2State(received_msg[1])
-                            document.getElementById("redStateDiv").innerHTML = num2State(received_msg[2])
-                            if (received_msg[3][0] == 0) {
-                                document.getElementById("turnInfoDiv").innerHTML = `第${received_msg[3][0]}回合，请放置`
+                            roomName = received_msg[1].name
+                            document.getElementById("roomInfo").innerHTML = `房间名：${roomName}`
+
+                            document.getElementById("blueStateDiv").innerHTML = num2State(received_msg[1].blueState)
+                            document.getElementById("redStateDiv").innerHTML = num2State(received_msg[1].redState)
+                            if (received_msg[1].nowTurn == 0) {
+                                document.getElementById("turnInfoDiv").innerHTML = `第${received_msg[1].nowTurn}回合，请放置`
                             } else {
-                                document.getElementById("turnInfoDiv").innerHTML = `第${received_msg[3][0]}回合，轮到${received_msg[3][1]}`
+                                document.getElementById("turnInfoDiv").innerHTML = `第${received_msg[1].nowTurn}回合，轮到${received_msg[1].nowPlayer}`
                             }
                             document.getElementById("playerInfo").innerHTML = `您是${factionNow}方`
                             document.getElementById("pregame").style.display = "none"
@@ -121,6 +142,13 @@ function tryWS() {
                                 }
                                 notice(`${faction()} 进入了游戏`)
                                 break;
+                            case "senditem":
+                                dataPacket.items.forEach(item => {
+                                    if (item.type == "ship") {
+                                        createShip(1, item.length)
+                                    }
+                                })
+                                break
                             case "playerconfirm":
                                 notice(`${dataPacket.data} 确认了布局`)
                                 break
@@ -158,7 +186,7 @@ function tryWS() {
                                 break
                             case "shipSink":
                                 if (dataPacket.data.faction == factionNow) {
-                                    let ramColor = `hsl(${Math.floor(Math.random() * 360)}, 100%, 50%)`
+                                    let ramColor = createRamColor()
                                     for (let index = 0; index < dataPacket.data.shipid.length; index++) {
                                         const id = "o" + dataPacket.data.shipid[index];
                                         document.getElementById(id).style.borderColor = ramColor
@@ -213,81 +241,6 @@ function tryWS() {
         })
 }
 
-class musicObj {
-    constructor(src) {
-        this.src = src
-    }
-    play(option, value) {
-        let ado = document.createElement("audio")
-        ado.src = this.src
-        ado.volume = 0.5
-        if (option == "switch") {
-            ado.onended = () => audioRes[resToGet.indexOf(value)].play("loop")
-        }
-        if (option == "loop") {
-            ado.loop = "loop"
-        }
-        musicPlaying.push(ado)
-        ado.play()
-    }
-}
-
-async function startLoad() {
-    document.getElementById("loadBnt").style.display = "none"
-    for (let index = 0; index < resToGet.length; index++) {
-        const element = resToGet[index];
-        await preload(element, index)
-        setProgressBar(index + 1, resToGet.length, "progress")
-    }
-    document.querySelector("#loadBytes").innerHTML = `加载完成`
-    document.querySelectorAll("button").forEach(element => {
-        element.addEventListener("click", () => playAudio("/res/g_ui_confirm.ogg"))
-    });
-    document.querySelector("#loginBnt").style.display = "inline-block"
-    audioRes[resToGet.indexOf("/res/m_sys_title_intro.ogg")].play("switch", "/res/m_sys_title_loop.ogg")
-}
-
-function preload(url, index) {
-    return new Promise(function (resolve, reject) {
-        localforage.getItem(url)
-            .then(file => {
-                let fileOK = function () {
-                    let musicObj_ = new musicObj(URL.createObjectURL(file))
-                    audioRes.push(musicObj_)
-                    setProgressBar(100, 100, "progressSingle")
-                    localforage.setItem(url, file).then(() => resolve())
-                }
-                if (!file) {
-                    let xhr = new XMLHttpRequest()
-                    xhr.responseType = "blob"
-                    xhr.onprogress = oEvent => {
-                        setProgressBar(oEvent.loaded, oEvent.total, "progressSingle")
-                        document.querySelector("#loadBytes").innerHTML = `正在加载资源 共${index}/${resToGet.length}个 当前资源${url} ${Math.ceil(oEvent.loaded / 1024)}KB / ${Math.ceil(oEvent.total / 1024)}KB`
-                    }
-                    xhr.onreadystatechange = function () {
-                        if (xhr.readyState == 4 && xhr.status == 200) {
-                            file = xhr.response
-                            fileOK()
-                        }
-                    }
-                    xhr.open("GET", url, true);
-                    xhr.send();
-                } else { fileOK() }
-            })
-    })
-}
-
-function playAudio(audio) {
-    audioRes[resToGet.indexOf(audio)].play()
-}
-
-function setProgressBar(now, total, objId) {
-    let progress = document.getElementById(objId)
-    progress.ariaValueMax = Math.floor(total)
-    progress.ariaValueNow = Math.floor(now)
-    progress.style.width = String(Math.floor(now) / Math.floor(total) * 100 + "%")
-}
-
 function login() {
     document.getElementById("loginBnt").disabled = "disabled"
     musicPlaying.forEach(obj => obj.pause())
@@ -334,34 +287,6 @@ function joinRed() {
     factionNow = "red"
 }
 
-function htmlspecialchars(str) {
-    str = String(str)
-    str = str.replace(" ", "&nbsp")
-    str = str.replace("&", "&amp")
-    str = str.replace("<", "&lt")
-    str = str.replace(">", "&gt")
-    str = str.replace('"', "&quot")
-    str = str.replace("'", "&apos")
-    return str;
-}
-
-function notice(content) {
-    let nNotice = document.createElement("div")
-    nNotice.className = "notice"
-    nNotice.innerHTML = content
-    nNotice.style.opacity = 0
-    document.getElementById("noticeContainer").appendChild(nNotice)
-    setTimeout(() => {
-        nNotice.style.opacity = 1
-    }, 10);
-    setTimeout(() => {
-        nNotice.style.opacity = 0
-        setTimeout(() => {
-            nNotice.style.display = "none"
-            nNotice.remove()
-        }, 350);
-    }, 2500);
-}
 
 function sendGameCreateRequest() {
     let name = document.getElementById("gameNameToCreate").value
@@ -372,4 +297,3 @@ function sendGameCreateRequest() {
     isCreatingRoom = false
     tagList = []
 }
-
