@@ -1,7 +1,7 @@
 "use strict"
 
 const resToGet = ["/res/m_sys_void_intro.ogg", "/res/m_sys_void_loop.ogg", "/res/m_sys_title_intro.ogg", "/res/m_sys_title_loop.ogg", "/res/m_bat_normal01_intro.ogg",
-    "/res/m_bat_normal01_loop.ogg", "/res/m_bat_normal02_intro.ogg", "/res/m_bat_normal02_loop.ogg", "/res/g_ui_btn_n.ogg", "/res/g_ui_confirm.ogg", "/res/g_ui_item.ogg", "/res/b_ui_mark.ogg", "/res/b_ui_alarmenter.ogg", "/res/b_ui_win.ogg", "/res/m_bat_failed_loop.ogg", "/res/m_bat_failed_intro_voice.ogg", "/res/m_bat_victory_loop.ogg", "/res/m_bat_victory_intro.ogg"]
+    "/res/m_bat_normal01_loop.ogg", "/res/m_sys_ccs0_loop.ogg", "/res/m_sys_ccs0_intro.ogg", "/res/g_ui_btn_n.ogg", "/res/g_ui_confirm.ogg", "/res/g_ui_item.ogg", "/res/b_ui_mark.ogg", "/res/b_ui_alarmenter.ogg", "/res/b_ui_win.ogg", "/res/m_bat_failed_loop.ogg", "/res/m_bat_failed_intro_voice.ogg", "/res/m_bat_victory_loop.ogg", "/res/m_bat_victory_intro.ogg"]
 const audioRes = []
 const musicPlaying = []
 let ws
@@ -12,6 +12,7 @@ let gameended = false
 let roomToTag = {}
 let roomTags = []
 let roomName = ""
+let saveToTag = {}
 
 function tryWS() {
     return new Promise(function (resolve, reject) {
@@ -30,14 +31,64 @@ function tryWS() {
             ws.onmessage = function (evt) {
                 var received_msg = JSON.parse(evt.data);
                 console.log(evt.data);
+                let table
                 switch (received_msg[0]) {
+                    case "download":
+                        //下载文件
+                        let a = document.createElement("a")
+                        a.href = URL.createObjectURL(new Blob([received_msg[2]], { type: "text/plain" }))
+                        a.download = received_msg[1]
+                        a.click()
+                        break;
+
+                    case "warning":
+                        notice(received_msg[1], "warning")
+                        break;
+                    case "success":
+                        notice(received_msg[1], "success")
+                        break;
+
+                    case "savelist":
+                        if (document.getElementById("loadingSaveNotice")) {
+                            document.getElementById("loadingSaveNotice").remove()
+                        }
+                        table = document.createElement("table")
+                        table.id = "existedSaves";
+                        table.style.width = "80%"
+                        table.innerHTML += ("<tr><td>房间名</td><td>唯一识别码</td><td>所选合约</td><td>放映</td><td>下载</td></tr>")
+                        for (let index = 0; index < received_msg[1].length; index++) {
+                            const lineData = received_msg[1][index];
+                            let line = document.createElement("tr")
+                            for (const key in lineData) {
+                                if (Object.hasOwnProperty.call(lineData, key)) {
+                                    const element = lineData[key];
+                                    let block = document.createElement("td")
+                                    if (key == "tags") {
+                                        block.innerHTML = `<a href="javascript:viewSaveInfo('${lineData["id"]}')">查看合约</a>`
+                                        saveToTag[lineData["id"]] = element
+                                    } else {
+                                        block.innerHTML = htmlspecialchars(element)
+                                    }
+                                    line.appendChild(block)
+                                }
+                            }
+                            line.innerHTML += `<td><a href='javascript:reviewSave("${lineData["id"]}")'>→</a></td>`
+                            line.innerHTML += `<td><a href='javascript:downloadSave("${lineData["id"]}")'>→</a></td>`
+                            table.appendChild(line)
+                        }
+                        document.getElementById("existedSaves").remove()
+                        document.getElementById("existedSavesContainer").appendChild(table)
+                        break;
+                    case "save":
+                        handleSavePlayback(received_msg[1])
+                        break;
                     case "gamelist":
                         if (document.getElementById("loadingRoomNotice")) {
                             document.getElementById("loadingRoomNotice").remove()
                         }
-                        let table = document.createElement("table")
+                        table = document.createElement("table")
                         table.id = "existedGames";
-                        table.innerHTML += ("<tr><td>房间名</td><td>唯一识别码</td><td>蓝方状态</td><td>红方状态</td><td>房间状态</td><td>所选合约</td><td>加入</td></tr>")
+                        table.innerHTML += ("<tr><td>房间名</td><td>唯一识别码</td><td>蓝方状态</td><td>红方状态</td><td>房间状态</td><td>所选合约</td><td>加入</td><td>操作</td></tr>")
                         for (let index = 0; index < received_msg[1].length; index++) {
                             const lineData = received_msg[1][index];
                             let line = document.createElement("tr")
@@ -55,6 +106,7 @@ function tryWS() {
                                 }
                             }
                             line.innerHTML += `<td><a href='javascript:selectGame("${lineData["id"]}")'>→</a></td>`
+                            line.innerHTML += `<td><a href="javascript:editRoom('${lineData["id"]}')">删除</a></td>`
                             table.appendChild(line)
                         }
                         document.getElementById("existedGames").remove()
@@ -296,4 +348,27 @@ function sendGameCreateRequest() {
     document.getElementById("createRoomBnt").style.display = "none";
     isCreatingRoom = false
     tagList = []
+}
+
+function editRoom(id) {
+    if (confirm("确定要删除房间吗？")) {
+        ws.send(JSON.stringify(["editRoom", id]))
+    }
+}
+
+function enterSavePlayback() {
+    musicPlaying.forEach(obj => obj.pause())
+    audioRes[resToGet.indexOf("/res/m_sys_ccs0_intro.ogg")].play("switch", "/res/m_sys_ccs0_loop.ogg")
+
+    document.getElementById("pregame").style.opacity = "0"
+    setTimeout(() => {
+        document.getElementById("pregame").style.display = "none"
+        document.getElementById("savePlayback").style.display = "block"
+        document.getElementById("savePlayback").style.opacity = 0
+        setTimeout(() => {
+            document.getElementById("savePlayback").style.opacity = 1
+        }, 10);
+
+    }, 510);
+    ws.send(JSON.stringify(["getSaveList"]))
 }

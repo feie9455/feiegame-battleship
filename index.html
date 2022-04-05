@@ -41,7 +41,7 @@
         <div>
             <h1>正在进行的游戏</h1>
             <p id="loadingRoomNotice">正在获取，请稍候。</p>
-            <div style="height: 60vh;overflow: scroll;" id="existedGamesContainer">
+            <div style="height: 60vh;overflow-y: scroll;" id="existedGamesContainer">
                 <table id="existedGames">
                 </table>
             </div>
@@ -52,6 +52,10 @@
 
             <button onclick="createGame()">创建</button>
         </div>
+
+        <button onclick="enterSavePlayback()"
+            style="position: fixed;top: 16px;right: 16px;width: 160px;">作战记录放映器</button>
+
     </div>
 
     <div id="chooseFaction" style="display: none;" class="card">
@@ -190,6 +194,50 @@
 
     </div>
 
+    <div id="savePlayback" style="display: none;">
+        <button onclick="window.location.reload()" id="reviewExitBnt"
+            style="position: fixed;top: 16px;left: 16px;">退出</button>
+
+        <h1 id="noticeOfPlayback">从神经网络加载已归档的作战记录</h1>
+        <p id="loadingSaveNotice">正在获取，请稍候。</p>
+        <div style="height: 60vh;overflow-y: scroll;" id="existedSavesContainer">
+            <div style="position: fixed;top: 16px;right: 16px">
+                从本地加载作战记录：<input type="file" id="loadSaveFile" onchange="handleSavePlaybackFromLocal()"
+                    style="background-color: white;color: black;">
+
+                <table id="existedSaves">
+                </table>
+            </div>
+        </div>
+        <div id="playback" style="display: none;">
+            <div style="width: 49%;display: inline-block;text-align: center;">
+                <h2>蓝色方</h2>
+                <div id="main_" style="width: fit-content;display: inline-block;">
+                </div>
+            </div>
+            <div style="width: 49%;display: inline-block;text-align: center;">
+                <h2>红色方</h2>
+                <div id="opponent_" style="width: fit-content;display: inline-block;">
+                </div>
+            </div>
+            <div id="playbackPanel" style="width: 80vw;position: fixed;left: 10vw;bottom: 16px;height: 200px;">
+                <div id="playbackinfo">
+
+                    <p id="playbackRoomName"></p>
+                    <p id="playbackRoomTime"></p>
+                    <p id="playbackRoomId"></p>
+                    <p id="playbackActionName">事件：Room created</p>
+                    <p id="playbackTurnInfoDiv">第-1回合</p>
+                    <br>
+                </div>
+                <div id="playbackControl">
+                    <button onclick="playbackNext()" id="reviewNextBnt">下一步</button>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div id="noticeContainer"></div>
 
 </body>
@@ -198,6 +246,6 @@
 <script src="./battle.js"></script>
 <script src="./ui.js"></script>
 <script src="./system.js"></script>
-
+<script src="./savePlayback.js"></script>
 
 </html>

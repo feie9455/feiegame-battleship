@@ -62,6 +62,13 @@ function viewRoomInfo(id) {
     refreshTagSelect()
 }
 
+function viewSaveInfo(id) {
+    document.getElementById("gameSettingDiv").style.display = "block";
+    tagList = saveToTag[id]
+    refreshTagSelect()
+}
+
+
 function refreshTagSelect() {
     tagList.sort()
     tagListInfo = []
@@ -85,6 +92,39 @@ document.querySelectorAll(".closeCardBnt").forEach(e => {
         e.parentElement.style.display = "none"
     })
 })
+
+function notice(content, type) {
+    let nNotice = document.createElement("div")
+    nNotice.className = "notice"
+    nNotice.innerHTML = content
+    nNotice.style.opacity = 0
+    if (type) {
+        if (type == "error") {
+            nNotice.style.backgroundColor = "#F93154"
+        } else if (type == "success") {
+            nNotice.style.backgroundColor = "#00B74A"
+        } else if (type == "warning") {
+            nNotice.style.backgroundColor = "#FFA900"
+        } else if (type == "info") {
+            nNotice.style.backgroundColor = "#1266F0"
+        }
+    } else {
+        nNotice.style.backgroundColor = "#1266F0"
+    }
+    document.getElementById("noticeContainer").appendChild(nNotice)
+    setTimeout(() => {
+        nNotice.style.opacity = 1
+    }, 10);
+    setTimeout(() => {
+        nNotice.style.opacity = 0
+        setTimeout(() => {
+            nNotice.style.display = "none"
+            nNotice.remove()
+        }, 350);
+    }, 2500);
+}
+
+
 
 
 //删除数组中所有含有特殊字段的项

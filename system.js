@@ -18,24 +18,6 @@ function htmlspecialchars(str) {
     return str;
 }
 
-function notice(content) {
-    let nNotice = document.createElement("div")
-    nNotice.className = "notice"
-    nNotice.innerHTML = content
-    nNotice.style.opacity = 0
-    document.getElementById("noticeContainer").appendChild(nNotice)
-    setTimeout(() => {
-        nNotice.style.opacity = 1
-    }, 10);
-    setTimeout(() => {
-        nNotice.style.opacity = 0
-        setTimeout(() => {
-            nNotice.style.display = "none"
-            nNotice.remove()
-        }, 350);
-    }, 2500);
-}
-
 
 class musicObj {
     constructor(src) {
