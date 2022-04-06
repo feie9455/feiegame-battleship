@@ -58,6 +58,8 @@ document.querySelectorAll(".tag").forEach(e => {
 
 function viewRoomInfo(id) {
     document.getElementById("gameSettingDiv").style.display = "block";
+    document.getElementById("enterRoomBnt").style.display = "block";
+    document.getElementById("enterRoomBnt").onclick = () => {selectGame(id)}
     tagList = roomToTag[id]
     refreshTagSelect()
 }

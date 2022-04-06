@@ -21,7 +21,7 @@ function tryWS() {
             if (!WebSocket) {
                 alert("您的浏览器不支持Websocket，请升级您的浏览器。")
             }
-            ws = new WebSocket(`wss://${window.location.host}:9454`)
+            ws = new WebSocket(`wss://${window.location.hostname}:9454`)
             ws.onopen = function () {
                 document.getElementById("WSLoadDiv").style.display = "none"
                 console.log(`WS connection OK.`);
@@ -88,7 +88,7 @@ function tryWS() {
                         }
                         table = document.createElement("table")
                         table.id = "existedGames";
-                        table.innerHTML += ("<tr><td>房间名</td><td>唯一识别码</td><td>蓝方状态</td><td>红方状态</td><td>房间状态</td><td>所选合约</td><td>加入</td><td>操作</td></tr>")
+                        table.innerHTML += ("<tr><td>房间名</td><td>唯一识别码</td><td>蓝方状态</td><td>红方状态</td><td>房间状态</td><td>操作</td></tr>")
                         for (let index = 0; index < received_msg[1].length; index++) {
                             const lineData = received_msg[1][index];
                             let line = document.createElement("tr")
@@ -97,16 +97,22 @@ function tryWS() {
                                     const element = lineData[key];
                                     let block = document.createElement("td")
                                     if (key == "tags") {
-                                        block.innerHTML = `<a href="javascript:viewRoomInfo('${lineData["id"]}')">查看合约</a>`
                                         roomToTag[lineData["id"]] = element
+
                                     } else {
                                         block.innerHTML = htmlspecialchars(element)
+                                        line.appendChild(block)
+
                                     }
-                                    line.appendChild(block)
                                 }
                             }
-                            line.innerHTML += `<td><a href='javascript:selectGame("${lineData["id"]}")'>→</a></td>`
                             line.innerHTML += `<td><a href="javascript:editRoom('${lineData["id"]}')">删除</a></td>`
+                            if (index % 2) {
+                                line.classList.add("oddtr")
+                            } else {
+                                line.classList.add("eventr")
+                            }
+                            line.ondblclick = function () { viewRoomInfo(lineData["id"]) }
                             table.appendChild(line)
                         }
                         document.getElementById("existedGames").remove()

@@ -7,7 +7,36 @@ body {
     padding: 0;
 }
 
+table{
+    border-spacing: 0;
+}
 
+td{
+    border-bottom: 1px solid #000;
+    padding: 6px;
+}
+
+tr{
+    transition: all 0.2s;
+}
+
+.oddtr{
+    background-color: lightblue;
+    color:"#083F7B";
+}
+
+.oddtr:hover{
+    background-color: hsl(195, 53%, 70%);
+}
+
+.eventr:hover{
+    background-color: hsl(0, 0%, 70%);
+}
+
+.eventr{
+    background-color: lightgray;
+    color:black;
+}
 
 #item {
     background-color: rgba(173, 216, 230, 0.9);

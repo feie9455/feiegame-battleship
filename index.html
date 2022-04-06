@@ -58,13 +58,6 @@
 
     </div>
 
-    <div id="chooseFaction" style="display: none;" class="card">
-        <h2 style="display: inline-block;">选择一方</h2>
-        <p onclick="document.getElementById('chooseBlueBnt').style.display='none';document.getElementById('chooseRedBnt').style.display='none'"
-            class="closeCardBnt">x</p>
-        <br><button style="display: none;" id="chooseBlueBnt" onclick="joinBlue()">蓝方</button>
-        <button style="display: none;" id="chooseRedBnt" onclick="joinRed()">红方</button>
-    </div>
 
     <div id="WSLoadDiv" style="display: none;z-index: 100;" class="card">
         <h2>尝试与神经网络建立WebSocket链接</h2>
@@ -74,7 +67,7 @@
     </div>
 
     <div class="card" id="gameSettingDiv" style="display: none;">
-        <p onclick='document.getElementById("createRoomBnt").style.display = "none";isCreatingRoom=false'
+        <p onclick='document.getElementById("createRoomBnt").style.display = "none";isCreatingRoom=false;document.getElementById("enterRoomBnt").style.display ="none"'
             class="closeCardBnt">
             X</p>
         <li style="height: 328px;">
@@ -158,6 +151,14 @@
         </li>
         <button style="position: absolute;right: 32px;bottom: 32px;display: none;" onclick="sendGameCreateRequest()"
             id="createRoomBnt">创建</button>
+        <button style="position: absolute;right: 32px;bottom: 32px;display: none;" id="enterRoomBnt">加入</button>
+    </div>
+    <div id="chooseFaction" style="display: none;" class="card">
+        <h2 style="display: inline-block;">选择一方</h2>
+        <p onclick="document.getElementById('chooseBlueBnt').style.display='none';document.getElementById('chooseRedBnt').style.display='none'"
+            class="closeCardBnt">x</p>
+        <br><button style="display: none;" id="chooseBlueBnt" onclick="joinBlue()">蓝方</button>
+        <button style="display: none;" id="chooseRedBnt" onclick="joinRed()">红方</button>
     </div>
 
     <div id="gameEndDiv" style="display: none;z-index: 80;" class="card">
@@ -237,6 +238,26 @@
                 </div>
             </div>
         </div>
+    </div>
+
+    <div id="copyrightNotice" class="card"
+        style="line-height: normal;width: 80vw;height: 80vh;left: 5vw;top: 5vh;text-align: left;padding: 32px;display: none;">
+        <h1>版权声明</h1>
+        <hr>
+        <h3>feiegame-battleship is licensed under the<br>
+            GNU General Public License v3.0<br><br>
+            本作品遵循GNU通用公共许可证v3.0协议<br>
+            已于<a href="https://github.com/feie9455/feiegame-battleship">Github</a>开源 版权所有 © 2022<br>
+        </h3>
+        <h4>本作使用了鹰角网络名下的网络游戏《明日方舟》的部分音乐，仅为个人学习、研究，著作权归鹰角网络所有*。</h4>
+        <h4>本作使用了开源项目<a href="https://github.com/localForage/localForage/">
+                localForage</a>，遵循Apache License 2.0协议发布</h4>
+        <button style="position: absolute;width: fit-content;bottom: 32px;right: 32px;"
+            id="copyrightOKBnt">我已了解(10)</button>
+
+        <footer>* 根据《中华人民共和国著作权法》第二十四条
+            在下列情况下使用作品，可以不经著作权人许可，不向其支付报酬，但应当指明作者姓名或者名称、作品名称，并且不得影响该作品的正常使用，也不得不合理地损害著作权人的合法权益：为个人学习、研究或者欣赏，使用他人已经发表的作品；
+        </footer>
     </div>
 
     <div id="noticeContainer"></div>

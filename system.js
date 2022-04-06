@@ -1,11 +1,32 @@
 "use strict"
+window.onload = () => {
+    localforage.getItem("viewedCopyright").then(isViewed => {
+        if (!isViewed) {
+            let copyrightTime = 10
+            let copyrightTimer = setInterval(() => {
+                copyrightTime--
+                document.querySelector("#copyrightOKBnt").innerHTML = `我已了解(${copyrightTime})`
+                if (copyrightTime == 0) {
+                    clearInterval(copyrightTimer)
+                }
+            }, 1000);
+            document.querySelector("#copyrightNotice").style.display = "block"
+            document.querySelector("#copyrightOKBnt").addEventListener("click", () => {
+                if (copyrightTime == 0) {
+                    document.querySelector("#copyrightNotice").style.display = "none"
+                    localforage.setItem("viewedCopyright", true)
+                }
+            })
+        }
+    }
+    )}
 
 if (navigator.serviceWorker != null) {
     navigator.serviceWorker.register('sw.js')
-    .then(function(registration) {
-      console.log('Registered events at scope: ', registration.scope);
-    });
-  }
+        .then(function (registration) {
+            console.log('Registered events at scope: ', registration.scope);
+        });
+}
 
 function htmlspecialchars(str) {
     str = String(str)
@@ -61,7 +82,7 @@ function preload(url, index) {
                             fileOK()
                         }
                     }
-                    xhr.open("GET", "https://feiesource.oss-cn-hangzhou.aliyuncs.com"+url, true);
+                    xhr.open("GET", "https://feiesource.oss-cn-hangzhou.aliyuncs.com" + url, true);
                     xhr.send();
                 } else { fileOK() }
             })
