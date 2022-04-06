@@ -210,7 +210,8 @@ function tryWS() {
                                 }
                                 if (dataPacket.data.factionNow == factionNow & dataPacket.data.turn != 0) {
                                     notice("轮到你了")
-                                    canAttack()
+                                    canAttack(dataPacket.data.canAttackTimes)
+                                    document.getElementById("attackInfo").innerHTML = `剩余攻击次数：${dataPacket.data.canAttackTimes}`
                                 }
                                 if (dataPacket.data.turn != 0) {
                                     document.getElementById("turnInfoDiv").innerHTML = `第${dataPacket.data.turn}回合，轮到${dataPacket.data.factionNow}`
@@ -236,13 +237,35 @@ function tryWS() {
                                     playAudio("/res/b_ui_alarmenter.ogg")
                                 }
                                 break
+                            case "attmiss":
+                                if (dataPacket.data.faction == factionNow) {
+                                    document.getElementById("o" + dataPacket.data.pos).innerHTML = "!"
+                                    setTimeout(() => {
+                                        document.getElementById("o" + dataPacket.data.pos).setAttribute("data-selected", "false")
+
+                                    }, 200);
+
+                                    playAudio("/res/b_ui_mark.ogg")
+                                } else {
+                                    document.getElementById("b" + dataPacket.data.pos).innerHTML = "!"
+                                    setTimeout(() => {
+                                        document.getElementById("o" + dataPacket.data.pos).setAttribute("data-selected", "false")
+
+                                    }, 200);
+                                    playAudio("/res/b_ui_alarmenter.ogg")
+                                }
+                                break
+
                             case "shipSink":
                                 if (dataPacket.data.faction == factionNow) {
                                     let ramColor = createRamColor()
-                                    for (let index = 0; index < dataPacket.data.shipid.length; index++) {
-                                        const id = "o" + dataPacket.data.shipid[index];
-                                        document.getElementById(id).style.borderColor = ramColor
-                                    }
+                                    setTimeout(() => {
+                                        for (let index = 0; index < dataPacket.data.shipid.length; index++) {
+                                            const id = "o" + dataPacket.data.shipid[index];
+                                            document.getElementById(id).style.borderColor = ramColor
+                                        }
+
+                                    }, 300);
                                 }
                                 break
                             case "playersuccess":

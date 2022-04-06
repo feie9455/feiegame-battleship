@@ -28,7 +28,7 @@ function handleSavePlayback(save) {
     reviewedSave.time = saveArr[1]
     reviewedSave.id = saveArr[3]
     reviewedSave.name = saveArr[5]
-    document.getElementById("playbackRoomName").innerHTML = "房间名；" + reviewedSave.name
+    document.getElementById("playbackRoomName").innerHTML = "房间名：" + reviewedSave.name
     document.getElementById("playbackRoomId").innerHTML = "房间ID：" + reviewedSave.id
     document.getElementById("playbackRoomTime").innerHTML = "创建时间：" + reviewedSave.time
     document.getElementById("noticeOfPlayback").style.display = "none"
@@ -112,6 +112,7 @@ function playbackNext() {
                     const line = actionContent[lineIndex];
                     for (let blockIndex = 0; blockIndex < line.length; blockIndex++) {
                         const element = line[blockIndex];
+
                         if (element) {
                             document.getElementById("o" + (lineIndex * reviewedSave.width + blockIndex)).style.backgroundColor = "red"
                         }
@@ -120,14 +121,52 @@ function playbackNext() {
             }
         } else {
             if (actionProperty.type == "normal") {
-                if (actionName.includes("blue")) {
-                    document.getElementById("o" + actionProperty.pos).innerHTML = "X"
-                } else {
-                    document.getElementById("b" + actionProperty.pos).innerHTML = "X"
+                //判断actionProperty.pos是否是数组
+                /* 
+                old version
+                if (Array.isArray(actionProperty.pos)) {
+                    if (actionName.includes("blue")) {
+                        actionProperty.pos.forEach(pos => document.getElementById("o" + pos).innerHTML = "X")
+                    }
+                    else {
+                        actionProperty.pos.forEach(pos => document.getElementById("b" + pos).innerHTML = "X")
+                    }
                 }
+                else {
+                    if (actionName.includes("blue")) {
+                        document.getElementById("o" + actionProperty.pos).innerHTML = "X"
+                    }
+                    else {
+                        document.getElementById("b" + actionProperty.pos).innerHTML = "X"
+                    }
+                }
+                */
+                actionProperty.result.forEach(element => {
+                    if (element) {
+                        if (actionName.includes("blue")) {
+                            if (element.isMiss=="true") {
+                                document.getElementById("o" + element.pos).innerHTML = "!"
+                            } else if(element.isMiss=="false"){
+                                document.getElementById("o" + element.pos).innerHTML = "o"
+                            }else if(element.isMiss=="none"){
+                                document.getElementById("o" + element.pos).innerHTML = "x"
+                            }
+                        }
+                        else {
+                            if (element.isMiss=="true") {
+                                document.getElementById("b" + element.pos).innerHTML = "!"
+                            } else if(element.isMiss=="false"){
+                                document.getElementById("b" + element.pos).innerHTML = "o"
+                            }else if(element.isMiss=="none"){
+                                document.getElementById("b" + element.pos).innerHTML = "x"
+                            }
+                        };
+                    }
+                })
             }
         }
-        document.getElementById("playbackTurnInfoDiv").innerHTML = `第${nowPlaybackTurn}回合`
+        document.getElementById("playbackTurnInfoDiv").innerHTML = `第${nowPlaybackTurn}个事件`
         nowPlaybackTurn++
+
     }
 }

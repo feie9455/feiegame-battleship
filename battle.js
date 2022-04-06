@@ -5,6 +5,9 @@ let gameStarted = false
 let mouseover
 let turn = 0
 let shipNum = 0
+let attackTimesLeft = 0
+let attackPos = []
+
 class ships {
     constructor(h, w, pos) {
         this.type = "aliveShip"
@@ -590,45 +593,61 @@ function confirmPlace() {
     }
 }
 
-function canAttack() {
+function canAttack(time) {
     if (!gameended) {
-        document.querySelectorAll(".mapBlock_").forEach(
-            element => {
-                if (!element.innerHTML) {
-                    element.onmousemove = () => {
+        attackTimesLeft = time
+        document.querySelectorAll(".mapBlock_").forEach(element => {
+            if (element.innerHTML != "o" && element.innerHTML != "x") {
+
+
+                element.onmousemove = () => {
+                    if (attackTimesLeft > 0) {
                         element.style.borderColor = "orange"
                     }
-                    element.onmouseleave = () => {
-                        element.style.borderColor = "black"
-
+                }
+                element.onmouseleave = () => {
+                    if (attackTimesLeft > 0) {
+                        if (element.getAttribute("data-selected") != "true") {
+                            element.style.borderColor = "black"
+                        }
                     }
-                    element.onmousedown = () => {
+                }
+                element.onmousedown = () => {
+                    if (attackTimesLeft > 0) {
+
                         attack(element.id.slice(1))
-                        element.style.borderColor = "black"
-
+                        element.style.borderColor = "orange"
+                        element.setAttribute("data-selected", "true")
                     }
-
                 }
             }
+        }
         )
-
     }
 }
 
-function stopAttack() {
-    document.querySelectorAll(".mapBlock_").forEach(
-        element => {
-            element.onmousemove = undefined
-            element.onmouseleave = undefined
-            element.onmousedown = undefined
-        }
-
-    )
-
-}
 
 function attack(id) {
-    stopAttack()
     console.log(`a:${id}`);
-    ws.send(JSON.stringify(["gameframe", { type: "attack", id: roomId, faction: factionNow, data: { pos: id, type: "normal" } }]))
+    attackPos.push(id)
+    attackTimesLeft--
+document.getElementById("attackInfo").innerHTML = "剩余攻击次数："+attackTimesLeft
+    if (attackTimesLeft == 0) {
+        document.querySelectorAll(".mapBlock_").forEach(
+            element => {
+                element.onmousemove = undefined
+                element.onmouseleave = undefined
+                element.onmousedown = undefined
+            }
+        )
+        ws.send(JSON.stringify(["gameframe", { type: "attack", id: roomId, faction: factionNow, data: { pos: attackPos, type: "normal" } }]))
+
+        attackPos.forEach(element => {
+            setTimeout(() => {
+                document.getElementById("o" + element).style.borderColor = "black"
+            }, 100);
+        })
+        attackPos = []
+    }
+
 }
