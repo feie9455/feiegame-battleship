@@ -33,6 +33,11 @@ function tryWS() {
                 console.log(evt.data);
                 let table
                 switch (received_msg[0]) {
+                    case "chat":
+                        document.getElementById("chatContentDiv").innerHTML += `<div class="chatContent"><strong>${received_msg[1].faction}:</strong> ${htmlspecialchars(received_msg[1].msg)}</div>`
+                        document.querySelectorAll(".chatContent")[document.querySelectorAll(".chatContent").length - 1].scrollIntoView({ behavior: "smooth" })
+                        break;
+            
                     case "download":
                         //下载文件
                         let a = document.createElement("a")
@@ -125,6 +130,7 @@ function tryWS() {
                         if (received_msg[3] != 2) { document.getElementById('chooseRedBnt').style.display = "inline-block" }
                         break;
                     case "entergame":
+                        document.getElementById('closeGameSettingBnt').click()
                         roomTags = received_msg[1].tags
                         clearInterval(refreshInterval)
                         document.getElementById("pregame").style.opacity = 0

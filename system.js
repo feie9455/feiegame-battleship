@@ -19,7 +19,8 @@ window.onload = () => {
             })
         }
     }
-    )}
+    )
+}
 
 if (navigator.serviceWorker != null) {
     navigator.serviceWorker.register('sw.js')
@@ -30,13 +31,28 @@ if (navigator.serviceWorker != null) {
 
 function htmlspecialchars(str) {
     str = String(str)
-    str = str.replace(" ", "&nbsp")
-    str = str.replace("&", "&amp")
-    str = str.replace("<", "&lt")
-    str = str.replace(">", "&gt")
-    str = str.replace('"', "&quot")
-    str = str.replace("'", "&apos")
+
+    str = str.allReplace("&", "&amp")
+    str = str.allReplace("<", "&lt")
+    str = str.allReplace(">", "&gt")
+    str = str.allReplace('"', "&quot")
+    str = str.allReplace("'", "&apos")
     return str;
+}
+
+String.prototype.allReplace = function (str, toStr) {
+    let oriStr = this
+    let num = 0
+    let replace = () => {
+        if (oriStr != oriStr.replace(str, toStr)) {
+            num++
+            oriStr = oriStr.replace(str, toStr)
+            replace()
+        }
+    }
+
+    replace()
+    return oriStr
 }
 
 
@@ -172,3 +188,16 @@ console.log(window.devicePixelRatio);
         return "string" == typeof d && d.match(/px$/) && (c += "rem"), c
     }
 }(window, window.lib || (window.lib = {}));
+
+
+document.getElementById("chatInputText").addEventListener("focus", () => {
+    document.onkeydown = function (e) {
+        if (e.key == "Enter" && document.getElementById("chatInputText").value != "") {
+            ws.send(JSON.stringify(["chat", factionNow, document.getElementById("chatInputText").value]))
+            document.getElementById("chatInputText").value = ""
+        }
+    }
+})
+document.getElementById("chatInputText").addEventListener("focusout", () => {
+    document.onkeydown = null
+})
