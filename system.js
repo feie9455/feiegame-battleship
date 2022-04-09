@@ -1,5 +1,25 @@
 "use strict"
+
+const resToGet = ["/res/m_sys_void_intro.ogg", "/res/m_sys_void_loop.ogg", "/res/m_sys_title_intro.ogg", "/res/m_sys_title_loop.ogg", "/res/m_bat_normal01_intro.ogg",
+    "/res/m_bat_normal01_loop.ogg", "/res/m_sys_ccs0_loop.ogg", "/res/m_sys_ccs0_intro.ogg", "/res/g_ui_btn_n.ogg", "/res/g_ui_confirm.ogg", "/res/g_ui_item.ogg",
+    "/res/b_ui_mark.ogg", "/res/b_ui_alarmenter.ogg", "/res/b_ui_win.ogg", "/res/m_bat_failed_loop.ogg", "/res/m_bat_failed_intro_voice.ogg", "/res/m_bat_victory_loop.ogg",
+    "/res/m_bat_victory_intro.ogg", "/res/emoji.zip"]
+const audioRes = []
+const musicPlaying = []
+let emoji = {}
+
+window.onresize = () => {
+    document.getElementById("chatInputText").style.width = document.getElementById("chat").clientWidth - 102 + "px"
+}
+
+document.onclick = e => {
+    if (e.target.id != "emojiList" && e.target.id != "showEmojiBnt" && e.target.className != "emojiListItem" && e.target.id != "emoji") {
+        document.getElementById("emoji").style.display = "none"
+    }
+}
+
 window.onload = () => {
+
     localforage.getItem("viewedCopyright").then(isViewed => {
         if (!isViewed) {
             let copyrightTime = 10
@@ -27,6 +47,10 @@ if (navigator.serviceWorker != null) {
         .then(function (registration) {
             console.log('Registered events at scope: ', registration.scope);
         });
+}
+
+function showEmoji() {
+        document.getElementById("emoji").style.display = "block"
 }
 
 function htmlspecialchars(str) {
@@ -80,8 +104,29 @@ function preload(url, index) {
         localforage.getItem(url)
             .then(file => {
                 let fileOK = function () {
-                    let musicObj_ = new musicObj(URL.createObjectURL(file))
-                    audioRes.push(musicObj_)
+                    //检测file类型
+                    if (file.type.indexOf("audio") != -1) {
+                        let musicObj_ = new musicObj(URL.createObjectURL(file))
+                        audioRes.push(musicObj_)
+                    }
+                    else if (file.type.indexOf("zip") != -1) {
+                        let zip = new JSZip()
+                        zip.loadAsync(file).then(function (zip) {
+                            zip.forEach(function (relativePath, file) {
+                                file.async("blob").then(function (content) {
+                                    emoji[relativePath] = content
+                                    let emojiE = document.createElement("img")
+                                    emojiE.src = URL.createObjectURL(content)
+                                    emojiE.className = "emojiListItem"
+                                    emojiE.addEventListener("click", () => {
+                                        document.getElementById("chatInputText").value += `#{${relativePath}}`
+                                    })
+                                    document.getElementById("emojiList").appendChild(emojiE)
+                                })
+
+                            })
+                        })
+                    }
                     setProgressBar(100, 100, "progressSingle")
                     localforage.setItem(url, file).then(() => resolve())
                 }
@@ -104,6 +149,10 @@ function preload(url, index) {
             })
     })
 }
+
+
+
+
 
 function playAudio(audio) {
     audioRes[resToGet.indexOf(audio)].play()
@@ -201,3 +250,8 @@ document.getElementById("chatInputText").addEventListener("focus", () => {
 document.getElementById("chatInputText").addEventListener("focusout", () => {
     document.onkeydown = null
 })
+function sendMsg(){
+    ws.send(JSON.stringify(["chat", factionNow, document.getElementById("chatInputText").value]))
+    document.getElementById("chatInputText").value = ""
+
+}

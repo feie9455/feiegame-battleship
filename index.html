@@ -53,7 +53,7 @@
             <button onclick="createGame()">创建</button>
         </div>
 
-        <button onclick="enterSavePlayback()"
+        <button onclick="enterSavePlayback()"   
             style="position: fixed;top: 16px;right: 16px;width: 160px;">作战记录放映器</button>
 
     </div>
@@ -167,7 +167,7 @@
         <button onclick="window.location.reload()">再来一局</button>
     </div>
 
-    <div id="game" style="opacity: 0;display: none;">
+    <div id="game" style="display: none;opacity: 0;;">
         <div style="width: 49%;display: inline-block;text-align: center;">
             <div id="main" style="width: fit-content;display: inline-block;">
             </div>
@@ -186,6 +186,12 @@
             <div id="chatInput">
                 <input type="text" id="chatInputText" placeholder="输入聊天内容">
             </div>
+            <button id="showEmojiBnt" onclick="showEmoji()">表情</button>
+            <button id="sendMsgBnt" onclick="sendMsg()">发送</button>
+            <div id="emoji">
+                <div id="emojiList"></div>
+            </div>
+
         </div>
         <div id="gameinfo">
             <p id="roomInfo"></p><br>
@@ -272,6 +278,7 @@
     <div id="noticeContainer"></div>
 
 </body>
+<script src="/js/jszip.min.js"></script>
 <script src="./game.js"></script>
 <script src="/js/localforage.min.js"></script>
 <script src="./battle.js"></script>

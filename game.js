@@ -1,9 +1,5 @@
 "use strict"
 
-const resToGet = ["/res/m_sys_void_intro.ogg", "/res/m_sys_void_loop.ogg", "/res/m_sys_title_intro.ogg", "/res/m_sys_title_loop.ogg", "/res/m_bat_normal01_intro.ogg",
-    "/res/m_bat_normal01_loop.ogg", "/res/m_sys_ccs0_loop.ogg", "/res/m_sys_ccs0_intro.ogg", "/res/g_ui_btn_n.ogg", "/res/g_ui_confirm.ogg", "/res/g_ui_item.ogg", "/res/b_ui_mark.ogg", "/res/b_ui_alarmenter.ogg", "/res/b_ui_win.ogg", "/res/m_bat_failed_loop.ogg", "/res/m_bat_failed_intro_voice.ogg", "/res/m_bat_victory_loop.ogg", "/res/m_bat_victory_intro.ogg"]
-const audioRes = []
-const musicPlaying = []
 let ws
 let roomId
 let factionNow
@@ -34,16 +30,28 @@ function tryWS() {
                 let table
                 switch (received_msg[0]) {
                     case "chat":
-                        document.getElementById("chatContentDiv").innerHTML += `<div class="chatContent"><strong>${received_msg[1].faction}:</strong> ${htmlspecialchars(received_msg[1].msg)}</div>`
+                        let msg = htmlspecialchars(received_msg[1].msg)
+                        let replaceEmoji = () => {
+                            msg = msg.replace(/#\{(.*?)\}/g, (match, p1) => {
+                                let img = document.createElement("img")
+                                img.src = URL.createObjectURL(emoji[p1])
+                                img.className = "chatEmoji"
+                                return img.outerHTML
+                            })
+                            if (msg.indexOf("#{") != -1) {
+                                replaceEmoji()
+                            }
+                        }
+                        if (msg.indexOf("#{") != -1) {
+                            replaceEmoji()
+                        }
+                        document.getElementById("chatContentDiv").innerHTML += `<div class="chatContent"><strong>${received_msg[1].faction}:</strong> ${msg}</div>`
                         document.querySelectorAll(".chatContent")[document.querySelectorAll(".chatContent").length - 1].scrollIntoView({ behavior: "smooth" })
                         break;
-            
+
                     case "download":
                         //下载文件
-                        let a = document.createElement("a")
-                        a.href = URL.createObjectURL(new Blob([received_msg[2]], { type: "text/plain" }))
-                        a.download = received_msg[1]
-                        a.click()
+                        saveAs(new Blob([received_msg[2]], { type: "text/plain" }), received_msg[1])
                         break;
 
                     case "warning":
@@ -130,6 +138,7 @@ function tryWS() {
                         if (received_msg[3] != 2) { document.getElementById('chooseRedBnt').style.display = "inline-block" }
                         break;
                     case "entergame":
+                        
                         document.getElementById('closeGameSettingBnt').click()
                         roomTags = received_msg[1].tags
                         clearInterval(refreshInterval)
@@ -181,6 +190,8 @@ function tryWS() {
                             document.getElementById("pregame").style.display = "none"
                             document.getElementById("chooseFaction").style.display = "none"
                             document.getElementById("game").style.display = "block"
+                            document.getElementById("chatInputText").style.width = document.getElementById("chat").clientWidth - 102 + "px"
+
                             setTimeout(() => {
                                 document.getElementById("game").style.opacity = 1
                                 audioRes[resToGet.indexOf("/res/m_bat_normal01_intro.ogg")].play("switch", "/res/m_bat_normal01_loop.ogg")
