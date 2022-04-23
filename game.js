@@ -9,8 +9,10 @@ let roomToTag = {}
 let roomTags = []
 let roomName = ""
 let saveToTag = {}
-
-function tryWS() {
+let wsOK = false
+let wsPromise
+let wsconnecting = false
+function cws() {
     return new Promise(function (resolve, reject) {
         document.getElementById("WSLoadDiv").style.display = "block"
         try {
@@ -19,9 +21,6 @@ function tryWS() {
             }
             ws = new WebSocket(`wss://${window.location.hostname}:9454`)
             ws.onopen = function () {
-                document.getElementById("WSLoadDiv").style.display = "none"
-                console.log(`WS connection OK.`);
-                document.getElementsByTagName("title")[0].innerHTML = "Feiegame-battleship[online]"
             };
 
             ws.onmessage = function (evt) {
@@ -29,6 +28,14 @@ function tryWS() {
                 console.log(evt.data);
                 let table
                 switch (received_msg[0]) {
+                    case "hello":
+                        wsOK = true
+                        document.getElementById("WSLoadDiv").style.display = "none"
+                        console.log(`WS connection OK.`);
+                        document.getElementsByTagName("title")[0].innerHTML = "Feiegame-battleship[online]"
+
+                        resolve()
+                        break;
                     case "chat":
                         let msg = htmlspecialchars(received_msg[1].msg)
                         let replaceEmoji = () => {
@@ -133,12 +140,12 @@ function tryWS() {
                         break;
                     case "enterroom":
                         roomId = received_msg[1]
-                        document.getElementById('chooseFaction').style.display = "block"
                         if (received_msg[2] != 2) { document.getElementById('chooseBlueBnt').style.display = "inline-block" }
                         if (received_msg[3] != 2) { document.getElementById('chooseRedBnt').style.display = "inline-block" }
+                        if (received_msg[2] == 2 && received_msg[3] == 2) { notice("房间已满", "warning") } else { document.getElementById('chooseFaction').style.display = "block" }
                         break;
                     case "entergame":
-                        
+
                         document.getElementById('closeGameSettingBnt').click()
                         roomTags = received_msg[1].tags
                         clearInterval(refreshInterval)
@@ -177,7 +184,7 @@ function tryWS() {
                                 }
                             }
                             roomName = received_msg[1].name
-                            document.getElementById("roomInfo").innerHTML = `房间名：${roomName}`
+                            document.getElementById("roomInfo").innerHTML = `房间名：${roomName} 点击分享`
 
                             document.getElementById("blueStateDiv").innerHTML = num2State(received_msg[1].blueState)
                             document.getElementById("redStateDiv").innerHTML = num2State(received_msg[1].redState)
@@ -320,43 +327,70 @@ function tryWS() {
 
             ws.onclose = function () {
                 document.getElementsByTagName("title")[0].innerHTML = "Feiegame-battleship[offline]"
+                wsOK = false
                 reject()
+                tryWS()
+                notice("神经网络连接失败，正在重试...", "error")
             };
 
-            ws.onerror = () => {
-                document.getElementsByTagName("title")[0].innerHTML = "Feiegame-battleship[offline]"
-                reject()
-            }
         } catch (error) {
+            wsOK = false
             reject()
-        }
-    })
-        .catch(e => {
             setTimeout(() => {
                 tryWS()
-                console.log("WS Connection failed, retry.");
+
             }, 2000);
+            notice("神经网络连接失败，正在重试...", "error")
+        }
+    })
+}
+
+function tryWS() {
+    if (!wsconnecting) {
+        wsconnecting = true
+        return new Promise(function (resolve, reject) {
+            let connect = () => {
+                cws()
+                    .then(() => {
+                        resolve()
+                        notice("神经网络连接成功！", "success")
+                        wsconnecting = false
+                    }).catch(() => {
+                        connect()
+                    })
+            }
+            if (wsOK) {
+                resolve()
+                notice("神经网络连接成功！", "success")
+                wsconnecting = false
+            } else {
+                connect()
+            }
         })
+
+    }
 }
 
 function login() {
-    document.getElementById("loginBnt").disabled = "disabled"
-    musicPlaying.forEach(obj => obj.pause())
-    document.querySelector("#loadDiv").style.display = "block"
-    document.querySelector("#loadDiv").style.opacity = 0
-    setTimeout(() => {
-        document.querySelector("#loadDiv").style.display = "none"
-        document.querySelector("#pregame").style.display = "block"
+    return new Promise(function (resolve, reject) {
+        document.getElementById("loginBnt").disabled = "disabled"
+        musicPlaying.forEach(obj => obj.pause())
+        document.querySelector("#loadDiv").style.display = "block"
+        document.querySelector("#loadDiv").style.opacity = 0
         setTimeout(() => {
-            document.querySelector("#pregame").style.opacity = 1
-        }, 10);
-        audioRes[resToGet.indexOf("/res/m_sys_void_intro.ogg")].play("switch", "/res/m_sys_void_loop.ogg")
-        ws.send(JSON.stringify(["getgames"]))
-    }, 501);
-    refreshInterval = setInterval(() => {
-        ws.send(JSON.stringify(["getgames"]))
-    }, 4000);
-    tryWS()
+            document.querySelector("#loadDiv").style.display = "none"
+            document.querySelector("#pregame").style.display = "block"
+            setTimeout(() => {
+                document.querySelector("#pregame").style.opacity = 1
+            }, 10);
+            audioRes[resToGet.indexOf("/res/m_sys_void_intro.ogg")].play("switch", "/res/m_sys_void_loop.ogg")
+            ws.send(JSON.stringify(["getgames"]))
+        }, 501);
+        refreshInterval = setInterval(() => {
+            ws.send(JSON.stringify(["getgames"]))
+        }, 4000);
+        tryWS().then(() => resolve())
+    })
 }
 
 function selectGame(id) {

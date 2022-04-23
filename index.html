@@ -164,10 +164,11 @@
     <div id="gameEndDiv" style="display: none;z-index: 80;" class="card">
         <h2>游戏结束，胜利者：</h2>
         <h1 id="winnerNameDiv"></h1>
-        <button onclick="window.location.reload()">再来一局</button>
+        <button onclick="window.location.href=window.location.origin+window.location.pathname;window.location.reload()">再来一局</button>
     </div>
 
     <div id="game" style="display: none;opacity: 0;;">
+        <p>提示：如果ui遮挡地图请使用ctrl和鼠标滚轮调节网页缩放大小</p>
         <div style="width: 49%;display: inline-block;text-align: center;">
             <div id="main" style="width: fit-content;display: inline-block;">
             </div>
@@ -194,7 +195,7 @@
 
         </div>
         <div id="gameinfo">
-            <p id="roomInfo"></p><br>
+            <a id="roomInfo" href="javascript:shareRoom()"></a><br>
             <p id="playerInfo"></p><br>
             <p id="turnInfoDiv">正在获取回合信息</p><br>
             <p id="attackInfo">剩余攻击次数：0</p><br>
@@ -211,7 +212,7 @@
     </div>
 
     <div id="savePlayback" style="display: none;">
-        <button onclick="window.location.reload()" id="reviewExitBnt"
+        <button onclick="window.location.href=window.location.origin+window.location.pathname;window.location.reload()" id="reviewExitBnt"
             style="position: fixed;top: 16px;left: 16px;">退出</button>
 
         <h1 id="noticeOfPlayback">从神经网络加载已归档的作战记录</h1>

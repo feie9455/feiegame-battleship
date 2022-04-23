@@ -19,27 +19,47 @@ document.onclick = e => {
 }
 
 window.onload = () => {
+    if (window.location.hash) {
+        let hash = window.location.hash.slice(1)
+        if (hash == "skipload") {
+            startLoad().then(() => {
+                setTimeout(() => {
+                    document.getElementById("loginBnt").click()
+                }, 10);
+            })
+        } else if (hash.includes("share")) {
+            startLoad().then(() => {
+                login().then(() => {
+                    setTimeout(() => {
+                        selectGame(hash.split("share")[1])
 
-    localforage.getItem("viewedCopyright").then(isViewed => {
-        if (!isViewed) {
-            let copyrightTime = 10
-            let copyrightTimer = setInterval(() => {
-                copyrightTime--
-                document.querySelector("#copyrightOKBnt").innerHTML = `我已了解(${copyrightTime})`
-                if (copyrightTime == 0) {
-                    clearInterval(copyrightTimer)
-                }
-            }, 1000);
-            document.querySelector("#copyrightNotice").style.display = "block"
-            document.querySelector("#copyrightOKBnt").addEventListener("click", () => {
-                if (copyrightTime == 0) {
-                    document.querySelector("#copyrightNotice").style.display = "none"
-                    localforage.setItem("viewedCopyright", true)
-                }
+                    }, 500);
+                })
             })
         }
+
+    } else {
+        localforage.getItem("viewedCopyright").then(isViewed => {
+            if (!isViewed) {
+                let copyrightTime = 10
+                let copyrightTimer = setInterval(() => {
+                    copyrightTime--
+                    document.querySelector("#copyrightOKBnt").innerHTML = `我已了解(${copyrightTime})`
+                    if (copyrightTime == 0) {
+                        clearInterval(copyrightTimer)
+                    }
+                }, 1000);
+                document.querySelector("#copyrightNotice").style.display = "block"
+                document.querySelector("#copyrightOKBnt").addEventListener("click", () => {
+                    if (copyrightTime == 0) {
+                        document.querySelector("#copyrightNotice").style.display = "none"
+                        localforage.setItem("viewedCopyright", true)
+                    }
+                })
+            }
+        }
+        )
     }
-    )
 }
 
 if (navigator.serviceWorker != null) {
@@ -50,7 +70,7 @@ if (navigator.serviceWorker != null) {
 }
 
 function showEmoji() {
-        document.getElementById("emoji").style.display = "block"
+    document.getElementById("emoji").style.display = "block"
 }
 
 function htmlspecialchars(str) {
@@ -250,8 +270,19 @@ document.getElementById("chatInputText").addEventListener("focus", () => {
 document.getElementById("chatInputText").addEventListener("focusout", () => {
     document.onkeydown = null
 })
-function sendMsg(){
+function sendMsg() {
     ws.send(JSON.stringify(["chat", factionNow, document.getElementById("chatInputText").value]))
     document.getElementById("chatInputText").value = ""
+
+}
+
+function shareRoom() {
+    //复制信息
+    navigator.clipboard.writeText(`我正在玩feiegame-battleship，房间名：${roomName}，合约等级：${tagLevel}。点击链接加入房间 => ${window.location.origin}${window.location.pathname}#share${roomId}`).then(function () {
+        notice("复制成功")
+    }, function (err) {
+        notice("复制失败", "error")
+    });
+
 
 }
