@@ -3,6 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=0.6,maximum-scale=0.6,user-scalable=0">
     <title>Feiegame-battleship[offline]</title>
     <link rel="stylesheet" href="./main.css">
     <link rel="icon" href="./icon.png">
@@ -33,11 +34,27 @@
             <div class="progress-bar" role="progressbar" style="width: 0%; height: 10px" aria-valuenow="0"
                 aria-valuemin="0" aria-valuemax="100" id="progressSingle" aria-label="Resources load progress"></div>
         </div>
-        <button onclick='localforage.clear().then(()=>notice("清理成功，将需要重新下载资源"))'
-            style="position: absolute;top: 16px;right: 16px;">清理缓存</button>
+        <div id="gameSettingBar" style="position: absolute;top: 16px;right: 16px;">
+            <button onclick='localforage.clear().then(()=>notice("清理成功，将需要重新下载资源"))'>清理缓存</button><br><br>
+            调试模式：<input type="checkbox" id="debugModeCheckbox"
+                onchange="localforage.setItem('debugMode',this.checked);debugModeEnable=this.checked"><br><br>
+            音量：<input type="range" id="sysVolume" min="0" max="1" step="0.01" value="1"
+                onchange="localforage.setItem('sysVolume',this.value);sysVolume=this.value;"><br>
+            <small style="color: gray;">*音量设置将在刷新页面后生效</small>
+            <br><br>
+            界面缩放：<input type="range" id="sysScale" min="0.3" max="1" step="0.1" value="1"
+                onchange="localforage.setItem('sysScale',this.value);sysScale(this.value);"><br>
+            <small style="color: gray;">*仅在移动设备生效</small>
+        </div>
+
     </div>
 
+
     <div id="pregame">
+        <div id="pregameTopBar">
+            <button onclick="enterSavePlayback()" style="width: 160px;">作战记录放映器</button>
+            <button onclick='ws.send(JSON.stringify(["getNotification"]));document.getElementById("publicNotification").style.display="block"' style="width: 160px;">公告</button>
+        </div>
         <div>
             <h1>正在进行的游戏</h1>
             <p id="loadingRoomNotice">正在获取，请稍候。</p>
@@ -52,9 +69,23 @@
 
             <button onclick="createGame()">创建</button>
         </div>
+        <div class="card" id="publicNotification"
+            style="width: 80vw;height: 80vh;left: 10vw;top: 10vh;line-height: normal;display: none;">
+            <div id="publicNotificationTitle"
+                style="text-align: center;height: 10vh;line-height: 10vh;margin: 0;padding: 0;">
+                <p style="margin: 0;font-size: x-large;">公告</p>
 
-        <button onclick="enterSavePlayback()"   
-            style="position: fixed;top: 16px;right: 16px;width: 160px;">作战记录放映器</button>
+            </div>
+            <p class="closeCardBnt">x</p>
+            <div id="publicNotificationContent" style="height: 70vh;padding:5vh 5vw 5vh 5vw;">
+                <div id="publicNotificationContentContainer"
+                    style="border: 2px solid gray;height: 58vh;position:relative">
+                    <div id="publicNotificationContentAside"
+                        style="border-right: 2px solid gray;height: 58vh;width: 18vw;position: absolute;top: 0;left: 0;overflow-y: scroll;"></div>
+                    <div id="publicNotificationContentMain" style="height: 100%;width:48vw;position: absolute;top: 0;left: 18vw;overflow-y: scroll;text-align: left;padding-left: 1.8vw;padding-right: 1.8vw;"></div>
+                </div>
+            </div>
+        </div>
 
     </div>
 
@@ -66,13 +97,13 @@
         <div class="loader"></div>
     </div>
 
-    <div class="card" id="gameSettingDiv" style="display: none;">
+    <div id="gameSettingDiv" class="card" style="display: none;">
         <p onclick='document.getElementById("createRoomBnt").style.display = "none";isCreatingRoom=false;document.getElementById("enterRoomBnt").style.display ="none"'
             class="closeCardBnt" id="closeGameSettingBnt">
             X</p>
         <li style="height: 328px;">
             <h2>可选合约：</h2>
-            <div style="overflow-x: scroll;overflow-y: hidden;">
+            <div style="overflow-x: scroll;overflow-y: hidden;" id="tagSelectorDiv">
                 <div style="width: max-content;">
                     <div class="tagContainer">
                         <h3>航母</h3>
@@ -164,7 +195,8 @@
     <div id="gameEndDiv" style="display: none;z-index: 80;" class="card">
         <h2>游戏结束，胜利者：</h2>
         <h1 id="winnerNameDiv"></h1>
-        <button onclick="window.location.href=window.location.origin+window.location.pathname;window.location.reload()">再来一局</button>
+        <button
+            onclick="window.location.href=window.location.origin+window.location.pathname;window.location.reload()">再来一局</button>
     </div>
 
     <div id="game" style="display: none;opacity: 0;;">
@@ -212,8 +244,8 @@
     </div>
 
     <div id="savePlayback" style="display: none;">
-        <button onclick="window.location.href=window.location.origin+window.location.pathname;window.location.reload()" id="reviewExitBnt"
-            style="position: fixed;top: 16px;left: 16px;">退出</button>
+        <button onclick="window.location.href=window.location.origin+window.location.pathname;window.location.reload()"
+            id="reviewExitBnt" style="position: fixed;top: 16px;left: 16px;">退出</button>
 
         <h1 id="noticeOfPlayback">从神经网络加载已归档的作战记录</h1>
         <p id="loadingSaveNotice">正在获取，请稍候。</p>
@@ -237,7 +269,7 @@
                 <div id="opponent_" style="width: fit-content;display: inline-block;">
                 </div>
             </div>
-            <div id="playbackPanel" style="width: 80vw;position: fixed;left: 10vw;bottom: 16px;height: 200px;">
+            <div id="playbackPanel" style="width: 80vw;position: fixed;left: 10vw;bottom: 16px;height: 300px;">
                 <div id="playbackinfo">
 
                     <p id="playbackRoomName"></p>
@@ -262,7 +294,8 @@
         <h3>feiegame-battleship is licensed under the<br>
             GNU General Public License v3.0<br><br>
             本作品遵循GNU通用公共许可证v3.0协议<br>
-            已于<a href="https://github.com/feie9455/feiegame-battleship">Github</a>开源 版权所有 <a href="https://github.com/feie9455/feie9455">feie9454</a> © 2022<br>
+            已于<a href="https://github.com/feie9455/feiegame-battleship">Github</a>开源 版权所有 <a
+                href="https://github.com/feie9455/feie9455">feie9454</a> © 2022<br>
         </h3>
         <h4>本作使用了上海鹰角网络科技有限公司名下的网络游戏《明日方舟》的部分音乐与音效，仅为个人学习、研究使用，著作权归上海鹰角网络科技有限公司所有*。</h4>
         <h4>本作使用了开源项目<a href="https://github.com/localForage/localForage/">
@@ -270,7 +303,8 @@
         <button style="position: absolute;width: fit-content;bottom: 32px;right: 32px;"
             id="copyrightOKBnt">我已了解(10)</button>
 
-        <footer>* 根据《中华人民共和国著作权法》第二十四条　<br>在下列情况下使用作品，可以不经著作权人许可，不向其支付报酬，但应当指明作者姓名或者名称、作品名称，并且不得影响该作品的正常使用，也不得不合理地损害著作权人的合法权益：<br>
+        <footer>*
+            根据《中华人民共和国著作权法》第二十四条　<br>在下列情况下使用作品，可以不经著作权人许可，不向其支付报酬，但应当指明作者姓名或者名称、作品名称，并且不得影响该作品的正常使用，也不得不合理地损害著作权人的合法权益：<br>
             （一）为个人学习、研究或者欣赏，使用他人已经发表的作品；
             <br>（二）......
         </footer>

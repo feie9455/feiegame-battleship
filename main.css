@@ -51,7 +51,7 @@ body {
 
 }
 
-#chat{
+#chat {
     background-color: rgba(173, 216, 230, 0.9);
     border-radius: 2px;
     border-style: dashed;
@@ -64,7 +64,7 @@ body {
     text-align: left;
 }
 
-#chat input{
+#chat input {
     height: 30px;
     display: inline-block;
     width: 100%;
@@ -72,12 +72,12 @@ body {
     left: 48px;
 }
 
-#chat button{
+#chat button {
     height: 30px;
     display: inline-block;
 }
 
-#chatInput{
+#chatInput {
     height: 30px;
     display: block;
     width: 100%;
@@ -85,14 +85,14 @@ body {
     bottom: 0;
 }
 
-#chatContentDiv{
+#chatContentDiv {
     text-align: left;
     overflow-y: scroll;
     overflow-x: hidden;
     height: 270px;
 }
 
-.chatContent{
+.chatContent {
     margin: 2px;
     width: 90%;
 }
@@ -118,21 +118,23 @@ body {
     scrollbar-color: #b490ca #F5F5F5;
 }
 
-#showEmojiBnt{
+#showEmojiBnt {
     position: absolute;
     bottom: 0;
     left: 2px;
     height: 30px;
     width: 44px;
 }
-#sendMsgBnt{
+
+#sendMsgBnt {
     position: absolute;
     bottom: 0;
     right: 2px;
     height: 30px;
     width: 44px;
 }
-#emoji{
+
+#emoji {
     height: 300px;
     width: 248px;
     overflow-y: scroll;
@@ -145,22 +147,22 @@ body {
     border-radius: 4px;
     border-style: solid;
     border-width: 2px;
-    box-shadow: 0 0 4px rgba(0, 0, 0, 0.3); 
+    box-shadow: 0 0 4px rgba(0, 0, 0, 0.3);
 }
 
-#emoji img{
+#emoji img {
     width: 32px;
     height: 32px;
     margin: 2px;
     transition: all 0.1s;
 }
 
-#emoji img:hover{
+#emoji img:hover {
     cursor: pointer;
-    background-color: rgba(0, 0, 0,0.1);
+    background-color: rgba(0, 0, 0, 0.1);
 }
 
-.chatEmoji{
+.chatEmoji {
     width: 24px;
     height: 24px;
     margin: 2px;
@@ -279,7 +281,7 @@ button:hover {
 }
 
 
-input {
+input[type="text"i] {
     background-color: #3A3A3A;
     border-style: none;
     height: 30px;
@@ -441,4 +443,28 @@ div {
 
 .closeCardBnt:hover {
     cursor: pointer;
+}
+
+.list-group-item {
+    line-height: 40px;
+    display: inline-block;
+    transition: all 0.1s;
+    width: 80%;
+    box-sizing: border-box;
+    height: max-content;
+    margin: 6px 10% 6px 10%;
+    border: 2px solid gray;
+}
+
+.list-group-item:hover {
+    cursor: pointer;
+    background-color: #969696;
+
+}
+
+.active {
+    border: 2px solid orange;
+}
+.list-group-item:first-child{
+    margin-top: 16px;
 }

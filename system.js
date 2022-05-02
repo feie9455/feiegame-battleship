@@ -7,7 +7,9 @@ const resToGet = ["/res/m_sys_void_intro.ogg", "/res/m_sys_void_loop.ogg", "/res
 const audioRes = []
 const musicPlaying = []
 let emoji = {}
-
+let debugModeEnabled = false
+let sysVolume
+let sysScaleRatio
 window.onresize = () => {
     document.getElementById("chatInputText").style.width = document.getElementById("chat").clientWidth - 102 + "px"
 }
@@ -19,6 +21,26 @@ document.onclick = e => {
 }
 
 window.onload = () => {
+    localforage.getItem("debugMode").then(debugMode => {
+        if (debugMode) {
+            debugModeEnabled = true
+            document.getElementById("debugModeCheckbox").checked = true
+        }
+    })
+    localforage.getItem("sysVolume").then(sysVolume_ => {
+        sysVolume = sysVolume_
+        if (!sysVolume) {
+            sysVolume = 0.5
+        }
+        document.getElementById("sysVolume").value = sysVolume
+    })
+    localforage.getItem("sysScaleRatio").then(sysScaleRatio_ => {
+        sysScaleRatio = sysScaleRatio_
+        if (!sysScaleRatio) {
+            sysScaleRatio = 0.6
+        }
+        document.getElementById("sysScale").value = sysScaleRatio
+    })
     if (window.location.hash) {
         let hash = window.location.hash.slice(1)
         if (hash == "skipload") {
@@ -107,7 +129,7 @@ class musicObj {
     play(option, value) {
         let ado = document.createElement("audio")
         ado.src = this.src
-        ado.volume = 0.5
+        ado.volume = sysVolume
         if (option == "switch") {
             ado.onended = () => audioRes[resToGet.indexOf(value)].play("loop")
         }
@@ -204,7 +226,7 @@ function setProgressBar(now, total, objId) {
 
 const createRamColor = () => `hsl(${Math.floor(Math.random() * 360)}, 100%, 50%)`
 
-
+/*
 console.log(window.navigator.userAgent);
 console.log(window.devicePixelRatio);
 !function (N, M) {
@@ -257,7 +279,7 @@ console.log(window.devicePixelRatio);
         return "string" == typeof d && d.match(/px$/) && (c += "rem"), c
     }
 }(window, window.lib || (window.lib = {}));
-
+*/
 
 document.getElementById("chatInputText").addEventListener("focus", () => {
     document.onkeydown = function (e) {
@@ -285,4 +307,20 @@ function shareRoom() {
     });
 
 
+}
+
+function saveAs(blob, name) {
+    var a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = name;
+    a.click();
+}
+
+function sysScale(ratio){
+    sysScaleRatio = ratio
+    document.querySelectorAll("meta")[1].remove()
+    let meta = document.createElement("meta")
+    meta.name = "viewport"
+    meta.content = "width=device-width, initial-scale="+ratio+", maximum-scale="+ratio+", minimum-scale="+ratio+", user-scalable=no"
+    document.head.appendChild(meta)
 }

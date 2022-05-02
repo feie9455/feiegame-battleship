@@ -56,6 +56,10 @@ document.querySelectorAll(".tag").forEach(e => {
     }
 })
 
+document.getElementById("tagSelectorDiv").addEventListener("wheel", (e) => {
+    smoothScrollBy(e.deltaY,0,document.getElementById("tagSelectorDiv"))
+})
+
 function viewRoomInfo(id) {
     document.getElementById("gameSettingDiv").style.display = "block";
     document.getElementById("enterRoomBnt").style.display = "block";
@@ -69,7 +73,24 @@ function viewSaveInfo(id) {
     tagList = saveToTag[id]
     refreshTagSelect()
 }
+function smoothScrollBy(offsetX,offsetY,element) {
+    let scrollX = element.scrollLeft
+    let scrollY = element.scrollTop
+    let step = 0
+    let stepX = offsetX / 10
+    let stepY = offsetY / 10
+    let scrollInterval = setInterval(() => {
+        step++
+        scrollX += stepX
+        scrollY += stepY
+        element.scrollLeft = scrollX
+        element.scrollTop = scrollY
+        if (step >= 10) {
+            clearInterval(scrollInterval)
+        }
+    }, 5);
 
+}
 
 function refreshTagSelect() {
     tagList.sort()
@@ -113,9 +134,10 @@ function notice(content, type) {
     } else {
         nNotice.style.backgroundColor = "#1266F0"
     }
+    
     document.getElementById("noticeContainer").appendChild(nNotice)
     setTimeout(() => {
-        nNotice.style.opacity = 1
+        nNotice.style.opacity=0.9
     }, 10);
     setTimeout(() => {
         nNotice.style.opacity = 0
@@ -126,7 +148,9 @@ function notice(content, type) {
     }, 2500);
 }
 
-
+function viewNotification(index){
+    document.getElementById("publicNotificationContentMain").innerHTML=noticeList[index].content
+}
 
 
 //删除数组中所有含有特殊字段的项

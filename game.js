@@ -12,6 +12,7 @@ let saveToTag = {}
 let wsOK = false
 let wsPromise
 let wsconnecting = false
+let noticeList = []
 function cws() {
     return new Promise(function (resolve, reject) {
         document.getElementById("WSLoadDiv").style.display = "block"
@@ -25,7 +26,9 @@ function cws() {
 
             ws.onmessage = function (evt) {
                 var received_msg = JSON.parse(evt.data);
-                console.log(evt.data);
+                if (debugModeEnabled) {
+                    console.log(evt.data);
+                }
                 let table
                 switch (received_msg[0]) {
                     case "hello":
@@ -36,6 +39,27 @@ function cws() {
 
                         resolve()
                         break;
+                    case "notification":
+                        noticeList=[]
+                        let asideContent =document.getElementById("publicNotificationContentAside")
+                        asideContent.innerHTML=""
+                        received_msg[1].split("==========").reverse().forEach(el=>{
+                            el=el.split("~~~~~~~~~~")
+                            noticeList.push({title:el[0],content:el[1]})
+                            let line = document.createElement("li")
+                            line.innerHTML=el[0]
+                            line.className="list-group-item"
+                            line.onclick=()=>{
+                                document.getElementById("publicNotificationContentMain").innerHTML=el[1]
+                                asideContent.childNodes.forEach(e=>e.className="list-group-item")
+                                line.classList.add("active")
+                            }
+                            asideContent.appendChild(line)
+
+                        })
+                        asideContent.childNodes[0].click()
+
+                    break
                     case "chat":
                         let msg = htmlspecialchars(received_msg[1].msg)
                         let replaceEmoji = () => {
@@ -133,6 +157,12 @@ function cws() {
                                 line.classList.add("eventr")
                             }
                             line.ondblclick = function () { viewRoomInfo(lineData["id"]) }
+                            //右键
+                            line.oncontextmenu = function (ev) {
+                                ev.preventDefault()
+                                viewRoomInfo(lineData["id"])
+                            }
+
                             table.appendChild(line)
                         }
                         document.getElementById("existedGames").remove()

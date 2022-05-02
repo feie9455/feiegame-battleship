@@ -2,7 +2,7 @@
     "name": "feiegame - battleship",
     "short_name": "battleship",
     "display": "standalone",
-    "start_url": "/",
+    "start_url": "/feiegame/battleship/",
     "theme_color": "#8888ff",
     "background_color": "#aaaaff",
     "icons": [
